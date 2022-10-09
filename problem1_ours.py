@@ -56,19 +56,3 @@ for possible_path in possible_paths:
           nodes_in_path.append(i)
     print(nodes_in_path)
     break
-
-
-
-# def DFSUtil(self, v, visited):
-#     visited[v]= True
-
-#     for i in self.graph[v]:
-#         if visited[i] == False:
-#             self.DFSUtil(i, visited)
-
-# def DFS(self):
-#     visited =[False]*nodes
-    
-#     for i in range(nodes):
-#         if visited[i] == False:
-#             self.DFSUtil(i, visited)
