@@ -6,7 +6,6 @@ def calculateNodeWeight(node_weights, index):
     total += node_weight
   return node_weights[index]/total
 
-
 nodes = 10
 robot_memory = 10
 adj_grid = numpy.eye(nodes)
@@ -21,7 +20,7 @@ for i in range(0,nodes): #assumes the starting node is only connected to the fir
 print(adj_grid)
 print(node_memory)
 
-# uniform probabilistic algorithm
+# weighted probabilistic algorithm
 # gives each adj node an equal chance and picks one
 
 # mapping the path
