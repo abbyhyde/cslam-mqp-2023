@@ -38,43 +38,40 @@ print(node_memory)
 # mapping the path
 # make that the next node
 at_end = False
-highest_cost = 0
+lowest_cost = robot_memory
 memory_left = robot_memory
 next_node = 0
 current_node = 0
 nodes_visited = []
-possible_next_nodes = []
 nodes_visited.append(current_node)
 # while not at the end or no more possible options
 while (not at_end):
   # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
   for i in range(0,nodes):
     # if ((adj_grid[current_node][i] == 1) and (current_node != i)):
-    #   print(str(i) + " " + str(node_memory[i]) + " " + str(highest_cost))
+    #   print(str(i) + " " + str(node_memory[i]) + " " + str(lowest_cost))
     #   print("    " + str(adj_grid[current_node][i]))
-    #   print("    " + str(highest_cost < node_memory[i]) + " " + str(i in nodes_visited))
-    if((highest_cost < node_memory[i]) and (node_memory[i] < memory_left) and (adj_grid[current_node][i] == 1) and (current_node != i)):
-      highest_cost = node_memory[i]
+      # print("    " + str(lowest_cost > node_memory[i]) + " " + str(i in nodes_visited))
+    if((lowest_cost > node_memory[i]) and (adj_grid[current_node][i] == 1) and (i not in nodes_visited) and (current_node != i)):
+      lowest_cost = node_memory[i]
       next_node = i
-      # print("Changed highest cost to " + str(highest_cost))
-    
+      # print("Changed lowest cost to " + str(lowest_cost))
   # check if the robot has enough memory left to go to the next node
   
-  if (current_node in nodes_visited and (node_memory[current_node] == highest_cost)):
+  if (current_node in nodes_visited and (node_memory[current_node] == lowest_cost)):
     at_end = True
-    # print(adj_grid[current_node])
-    # print("Couldn't find another node adjacent to " + str(current_node) + ", ending.")
-    # print("Path: " + str(nodes_visited))
-  elif(highest_cost < memory_left and (next_node not in nodes_visited)):
+    print(adj_grid[current_node])
+    print("Couldn't find another node adjacent to " + str(current_node) + ", ending.")
+    print("Path: " + str(nodes_visited))
+  elif(lowest_cost < memory_left and (next_node not in nodes_visited)):
     nodes_visited.append(next_node)
     current_node = next_node
     memory_left -= node_memory[next_node]
-    highest_cost = 0
-    # print("Next node: " + str(next_node) + ", has cost of " + str(node_memory[next_node]))
+    lowest_cost = memory_left
+    print("Next node: " + str(next_node) + ", has cost of " + str(node_memory[next_node]))
     # print("Available memory left: " + str(memory_left))
   else:
     at_end = True
-    # print("Not enough memory left, done with path at node " + str(current_node))
-    # print("Available memory left: " + str(memory_left))
-    # print(adj_grid[current_node])
-  # print("Path: " + str(nodes_visited))
+    print("Not enough memory left, done with path at node " + str(current_node))
+    print(adj_grid[current_node])
+    print("Path: " + str(nodes_visited))
