@@ -1,5 +1,7 @@
 import random, numpy, math
 
+# implements a greedy algorithm except it always picks the lowest possible memory cost for each adj set
+
 def isTravelable(path):
   nodes_visit = []
   nodes_reachable = []

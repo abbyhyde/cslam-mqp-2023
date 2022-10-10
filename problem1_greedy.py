@@ -33,7 +33,7 @@ print(adj_grid)
 print(node_memory)
 
 # greedy algorithm
-# adds the lowest possible cost to explore the longest as possible
+# adds the highest possible cost to explore the longest as possible
 
 # mapping the path
 # make that the next node
