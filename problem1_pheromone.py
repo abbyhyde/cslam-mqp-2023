@@ -1,4 +1,4 @@
-import random, numpy, math, threading
+import random, numpy, math, time
 
 def calculateNodeWeight(prev, next):
   total = 0
@@ -41,24 +41,26 @@ def ant():
   return nodes_visited, memory_left
 
 
-nodes = 10
+nodes = 20
 robot_memory = 10
-adj_grid = numpy.eye(nodes)
-node_memory = numpy.empty(nodes)
-edge_pheromone = numpy.ones((nodes, nodes))
-prob_connection = 0.5
-pheromone_decay = 0.75
-for i in range(0,nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
-  node_memory[i] = (robot_memory/1.5)*random.random()
-  for j in range(i,nodes):
-    if(i == j or random.random() < prob_connection):
-      adj_grid[i][j] = 1
-      adj_grid[j][i] = 1
-print(adj_grid)
-print(node_memory)
-
-for i in range(0,999):
-  n,m = ant()
-nodes_visited, memory_left = ant()
-print("Path: " + str(nodes_visited))
-print("Available memory left: " + str(memory_left))
+for i in range(0,20):
+  adj_grid = numpy.eye(nodes)
+  node_memory = numpy.empty(nodes)
+  edge_pheromone = numpy.ones((nodes, nodes))
+  prob_connection = 0.5
+  pheromone_decay = 0.75
+  for i in range(0,nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
+    node_memory[i] = (robot_memory/1.5)*random.random()
+    for j in range(i,nodes):
+      if(i == j or random.random() < prob_connection):
+        adj_grid[i][j] = 1
+        adj_grid[j][i] = 1
+  #print(adj_grid)
+  #print(node_memory)
+  start = time.monotonic_ns()
+  for i in range(0,1000):
+    n,m = ant()
+  nodes_visited, memory_left = ant()
+  #print("Path: " + str(nodes_visited))
+  #print("Available memory left: " + str(memory_left))
+  print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))

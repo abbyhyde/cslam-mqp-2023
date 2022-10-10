@@ -1,4 +1,4 @@
-import random, numpy, math
+import random, numpy, math, time
 
 def isTravelable(path):
   nodes_visit = []
@@ -18,7 +18,7 @@ def isTravelable(path):
     return True
   return False
 
-nodes = 10
+nodes = 20
 robot_memory = 10
 adj_grid = numpy.eye(nodes)
 node_memory = numpy.empty(nodes)
@@ -36,6 +36,7 @@ print(node_memory)
 #any thing above max memory get axed, go through the others to find a valid path
 
 #calculate cost of each combo of nodes
+start = time.monotonic_ns()
 possible_paths = []
 for i in range(1,2**nodes):
   cost = 0
@@ -56,3 +57,4 @@ for possible_path in possible_paths:
           nodes_in_path.append(i)
     print(nodes_in_path)
     break
+print((time.monotonic_ns()-start)/1000000)
