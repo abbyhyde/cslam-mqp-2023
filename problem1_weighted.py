@@ -1,4 +1,5 @@
 import random, numpy, math, time
+import seed
 
 def calculateNodeWeight(node_weights, index):
   total = 0
@@ -8,17 +9,19 @@ def calculateNodeWeight(node_weights, index):
 
 nodes = 20
 robot_memory = 10
+random.seed(seed.seed) # sets the seed for random number generation to the seed from seed.py
 for i in range(0,20):
   adj_grid = numpy.eye(nodes)
   node_memory = numpy.empty(nodes)
   prob_connection = 0.5
   for i in range(0,nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
-    node_memory[i] = (robot_memory/1.5)*random.random()
+    rfloat = random.random()
+    node_memory[i] = (robot_memory/1.5)*rfloat
     for j in range(i,nodes):
-      if(i == j or random.random() < prob_connection):
+      if(i == j or rfloat < prob_connection):
         adj_grid[i][j] = 1
         adj_grid[j][i] = 1
-  #print(adj_grid)
+  # print(adj_grid)
   #print(node_memory)
 
   # weighted probabilistic algorithm
@@ -56,4 +59,4 @@ for i in range(0,20):
     else:
       at_end = True
       #print("Path: " + str(nodes_visited))
-      print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
+      # print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
