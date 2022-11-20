@@ -19,9 +19,11 @@ def isTravelable(path):
     return True
   return False
 
-nodes = 20
-robot_memory = 10
-random.seed(seed.seed) # sets the seed for random number generation to the seed from seed.py
+#settings params from params.py
+nodes = params.nodes
+robot_memory = params.memory
+robots = params.robots
+random.seed(params.seed)
 adj_grid = numpy.eye(nodes)
 node_memory = numpy.empty(nodes)
 prob_connection = 0.5
