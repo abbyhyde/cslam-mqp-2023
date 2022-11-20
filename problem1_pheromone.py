@@ -48,7 +48,7 @@ for i in range(0,20):
   node_memory = numpy.empty(nodes)
   edge_pheromone = numpy.ones((nodes, nodes))
   prob_connection = 0.5
-  pheromone_decay = 0.75
+  pheromone_decay = 0.25
   for i in range(0,nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
     node_memory[i] = (robot_memory/1.5)*random.random()
     for j in range(i,nodes):
