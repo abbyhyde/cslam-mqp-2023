@@ -3,7 +3,7 @@ This file is for defining the seed that's used in the random generation of the g
 the random generation for every algorithm. The random numbers generated will be consistent across algorithms. 
 """
 
-seed = 123
+seed = 1234
 nodes = 20
 memory = 10
 robots = 1

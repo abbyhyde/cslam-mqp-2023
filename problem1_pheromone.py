@@ -1,5 +1,5 @@
 import random, numpy, math, time
-import seed
+import params
 
 def calculateNodeWeight(prev, next):
   total = 0

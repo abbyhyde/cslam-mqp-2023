@@ -1,5 +1,5 @@
 import random, numpy, math, time
-import seed
+import params
 
 def isTravelable(path):
   nodes_visit = []
@@ -32,7 +32,7 @@ for i in range(0,20):
     rfloat = random.random()
     node_memory[i] = (robot_memory/1.5)*rfloat
     for j in range(i,nodes):
-      if(i == j or rfloat < prob_connection):
+      if(i == j or random.random() < prob_connection):
         adj_grid[i][j] = 1
         adj_grid[j][i] = 1
     # print(rfloat)
@@ -54,25 +54,24 @@ for i in range(0,20):
   # while not at the end or no more possible options
   start = time.monotonic_ns()
   while (not at_end):
+    possible_next_nodes = []
     # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
-    for i in range(0,nodes):
-      if((adj_grid[current_node][i] == 1) and (i not in nodes_visited) and (current_node != i) and (node_memory[i] < memory_left)):
-        # add number to array
-        possible_next_nodes.append(i)
-        # print("added " + str(i))
-      
+    for j in nodes_visited:
+      for i in range(0,nodes):
+        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left):
+          # add number to array
+          possible_next_nodes.append(i)
+    
+
+    
     # if robot has enough memory to go to the selected node and robot has not visited it already
-    if (possible_next_nodes != []):
-      next_node = numpy.random.choice(possible_next_nodes)
-      nodes_visited.append(next_node)
-      current_node = next_node
-      memory_left -= node_memory[next_node]
-      possible_next_nodes = []
-      # print("Next node: " + str(next_node) + ", has cost of " + str(node_memory[next_node]))
-      # print("Available memory left: " + str(memory_left))
+    if (len(possible_next_nodes) > 0):
+      next_node_index = math.floor(random.random()*len(possible_next_nodes))
+      nodes_visited.append(possible_next_nodes[next_node_index])
+      memory_left = memory_left - node_memory[possible_next_nodes[next_node_index]]
+      #print("Next node: " + str(possible_next_nodes[next_node_index]) + ", has cost of " + str(node_memory[possible_next_nodes[next_node_index]]))
+      #print("Available memory left: " + str(memory_left))
     else:
       at_end = True
-      # print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
-      # print("Done with path at node " + str(current_node))
-      # print(adj_grid[current_node])
-      # print("Path: " + str(nodes_visited))
+      #print("Path: " + str(nodes_visited))
+      print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))

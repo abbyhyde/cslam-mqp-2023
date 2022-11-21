@@ -1,5 +1,5 @@
 import random, numpy, math, time
-import seed
+import params
 
 def isTravelable(path):
   nodes_visit = []

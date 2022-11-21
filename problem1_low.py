@@ -1,5 +1,5 @@
 import random, numpy, math
-import seed
+import params
 
 # implements a greedy algorithm except it always picks the lowest possible memory cost for each adj set
 
@@ -51,35 +51,33 @@ memory_left = robot_memory
 next_node = 0
 current_node = 0
 nodes_visited = []
-nodes_visited.append(current_node)
+nodes_visited.append(next_node)
 # while not at the end or no more possible options
-while (not at_end):
-  # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
-  for i in range(0,nodes):
-    # if ((adj_grid[current_node][i] == 1) and (current_node != i)):
-    #   print(str(i) + " " + str(node_memory[i]) + " " + str(lowest_cost))
-    #   print("    " + str(adj_grid[current_node][i]))
-      # print("    " + str(lowest_cost > node_memory[i]) + " " + str(i in nodes_visited))
-    if((lowest_cost > node_memory[i]) and (adj_grid[current_node][i] == 1) and (i not in nodes_visited) and (current_node != i)):
-      lowest_cost = node_memory[i]
-      next_node = i
-      # print("Changed lowest cost to " + str(lowest_cost))
-  # check if the robot has enough memory left to go to the next node
-  
-  if (current_node in nodes_visited and (node_memory[current_node] == lowest_cost)):
-    at_end = True
-    print(adj_grid[current_node])
-    print("Couldn't find another node adjacent to " + str(current_node) + ", ending.")
-    print("Path: " + str(nodes_visited))
-  elif(lowest_cost < memory_left and (next_node not in nodes_visited)):
-    nodes_visited.append(next_node)
-    current_node = next_node
-    memory_left -= node_memory[next_node]
-    lowest_cost = memory_left
-    print("Next node: " + str(next_node) + ", has cost of " + str(node_memory[next_node]))
-    # print("Available memory left: " + str(memory_left))
-  else:
-    at_end = True
-    print("Not enough memory left, done with path at node " + str(current_node))
-    print(adj_grid[current_node])
-    print("Path: " + str(nodes_visited))
+ while (not at_end):
+    # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
+    possible_next_nodes = []
+    # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
+    for j in nodes_visited:
+      for i in range(0,nodes):
+        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left):
+          # add number to array
+          possible_next_nodes.append(i)
+    
+
+    
+    # if robot has enough memory to go to the selected node and robot has not visited it already
+    if (len(possible_next_nodes) > 0):
+      for i in possible_next_nodes:
+        if(lowest_cost > node_memory[i]):
+          lowest_cost = node_memory[i]
+          next_node = i
+      nodes_visited.append(next_node)
+      memory_left -= node_memory[next_node]
+      highest_cost = 0
+    else:
+      at_end = True
+      print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
+      # print("Not enough memory left, done with path at node " + str(current_node))
+      # print("Available memory left: " + str(memory_left))
+      # print(adj_grid[current_node])
+    # print("Path: " + str(nodes_visited))
