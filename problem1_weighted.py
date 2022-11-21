@@ -1,5 +1,5 @@
 import random, numpy, math, time
-import seed
+import params
 
 def calculateNodeWeight(node_weights, index):
   total = 0
@@ -12,7 +12,7 @@ nodes = params.nodes
 robot_memory = params.memory
 robots = params.robots
 random.seed(params.seed)
-for i in range(0,20):
+for i in range(0,20): # the number of times we're running the experiment
   adj_grid = numpy.eye(nodes)
   node_memory = numpy.empty(nodes)
   prob_connection = 0.5

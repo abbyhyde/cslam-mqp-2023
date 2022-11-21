@@ -1,5 +1,5 @@
 import random, numpy, math
-import seed
+import params
 
 # implements a greedy algorithm except it always picks the lowest possible memory cost for each adj set
 
