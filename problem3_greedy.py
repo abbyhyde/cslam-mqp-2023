@@ -76,14 +76,14 @@ for i in range(0,1):
         
         # if robot has enough memory to go to the selected node and robot has not visited it already
         if (len(possible_next_nodes) > 0):
-            for i in possible_next_nodes:
-                if(highest_cost < node_memory[i] and nodes_mapped[i] != 1):
-                    highest_cost = node_memory[i]
-                    next_node = i
-            nodes_visited.append(next_node)
-            nodes_mapped[next_node] = 1
-            memory_left -= node_memory[next_node]
-            highest_cost = 0
+          for i in possible_next_nodes:
+              if(highest_cost < node_memory[i] and nodes_mapped[i] != 1):
+                  highest_cost = node_memory[i]
+                  next_node = i
+          nodes_visited.append(next_node)
+          nodes_mapped[next_node] = 1
+          memory_left -= node_memory[next_node]
+          highest_cost = 0
         elif(not expand):
             expand = True
             for i in range(1, len(nodes_mapped)):

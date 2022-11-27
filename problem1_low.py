@@ -53,7 +53,7 @@ current_node = 0
 nodes_visited = []
 nodes_visited.append(next_node)
 # while not at the end or no more possible options
- while (not at_end):
+while (not at_end):
     # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
     possible_next_nodes = []
     # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
