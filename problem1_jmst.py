@@ -44,23 +44,33 @@ for i in range(0,20):
   # mapping the path
   # make that the next node
   at_end = False
-  highest_cost = 0
+  lowest_cost = robot_memory
   memory_left = robot_memory
   next_node = 0
   nodes_visited = []
   possible_next_nodes = []
   nodes_visited.append(next_node)
   # while not at the end or no more possible options
+  #using prim's alg to approximate the j-mst
   start = time.monotonic_ns()
-  j = 0
   while (not at_end):
-    j += 1
-    # find j node mst that includes 0
-
+    # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
+    possible_next_nodes = []
+    for j in nodes_visited:
+      for i in range(0,nodes):
+        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left):
+          possible_next_nodes.append(i)
     
-    #if it doesn't fit into memory
-    if ():
-        #path is the last j node mst
+    # if robot has enough memory to go to the selected node and robot has not visited it already
+    if (len(possible_next_nodes) > 0):
+      for i in possible_next_nodes:
+        if(lowest_cost > node_memory[i]):
+          lowest_cost = node_memory[i] # as per prim's alg add the smallest node to the tree
+          next_node = i
+      nodes_visited.append(next_node)
+      memory_left -= node_memory[next_node]
+      lowest_cost = robot_memory
+    else:
       at_end = True
       print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
       # print("Not enough memory left, done with path at node " + str(current_node))
