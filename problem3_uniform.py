@@ -25,9 +25,8 @@ robot_memory = params.memory
 robots = params.robots
 random.seed(params.seed)
 
-# some way to store paths that happened before -> array of strings
 for i in range(0,1):  # the number of times we're running the experiment
-  adj_grid = numpy.eye(nodes)
+  adj_grid = numpy.eye(nodes, nodes, 0, int)
   node_memory = numpy.empty(nodes)
   nodes_mapped = numpy.empty(nodes)
   prob_connection = 0.5
@@ -40,6 +39,29 @@ for i in range(0,1):  # the number of times we're running the experiment
         adj_grid[j][i] = 1
   # print(adj_grid)
   # print(node_memory)
+
+  # perform bfs to check whether the graph is connected
+  current_node_index = 0
+  nodes_checked = []
+  nodes_checked.append(current_node_index)
+  queue = []
+  queue.append(current_node_index)
+  while queue:
+    current_node_index = queue.pop(0)
+    # print(current_node_index)
+    for i in adj_grid[current_node_index]:
+      if i not in nodes_checked and adj_grid[current_node_index][i] == 1:
+        nodes_checked.append(i)
+        queue.append(i)
+  
+  # now we check which nodes were not covered by bfs
+  for j in range(nodes):
+    if j not in nodes_checked:
+      # connect the node to a random node in the main part of the graph
+      connection_index = math.floor(random.random() * len(nodes_checked))
+      adj_grid[connection_index][j] = 1
+      adj_grid[j][connection_index] = 1
+      # print("connected " + str(j) + " to " + str(connection_index))
 
   # uniform probabilistic algorithm
   # gives each adj node an equal chance and picks one
