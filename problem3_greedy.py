@@ -36,8 +36,8 @@ for i in range(0,1):
       if(i == j or random.random() < prob_connection):
         adj_grid[i][j] = 1
         adj_grid[j][i] = 1
-  # print(adj_grid)
-  print(node_memory)
+  #print(adj_grid)
+  #print(node_memory)
 
   # perform bfs to check whether the graph is connected
   current_node_index = 0
@@ -126,4 +126,3 @@ for i in range(0,1):
           # print("Available memory left: " + str(memory_left))
           # print(adj_grid[current_node])
           print("Path: " + str(nodes_visited))
-          input()

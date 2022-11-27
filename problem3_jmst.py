@@ -36,8 +36,8 @@ for i in range(0,1):
       if(i == j or random.random() < prob_connection):
         adj_grid[i][j] = 1
         adj_grid[j][i] = 1
-  print(adj_grid)
-  print(node_memory)
+  #print(adj_grid)
+  #print(node_memory)
 
   # perform bfs to check whether the graph is connected
   current_node_index = 0
@@ -61,12 +61,6 @@ for i in range(0,1):
       adj_grid[connection_index][j] = 1
       adj_grid[j][connection_index] = 1
       # print("connected " + str(j) + " to " + str(connection_index))
-
-  # greedy algorithm
-  # adds the highest possible cost to explore the longest as possible
-
-  # mapping the path
-  # make that the next node
   
   nodes_mapped[0] = 1
   # while not at the end or no more possible options
@@ -118,4 +112,3 @@ for i in range(0,1):
           print("robot-" + str(robot)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
           robot += 1
           print("Path: " + str(nodes_visited))
-          input()
