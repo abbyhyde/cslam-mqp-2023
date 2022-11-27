@@ -48,7 +48,7 @@ robot_memory = params.memory
 robots = params.robots
 random.seed(params.seed)
 for i in range(0,20):
-  adj_grid = numpy.eye(nodes)
+  adj_grid = numpy.eye(nodes, nodes, 0, int)
   node_memory = numpy.empty(nodes)
   edge_pheromone = numpy.ones((nodes, nodes))
   prob_connection = 0.5

@@ -25,7 +25,7 @@ robot_memory = params.memory
 robots = params.robots
 random.seed(params.seed)
 for i in range(0,1):
-  adj_grid = numpy.eye(nodes)
+  adj_grid = numpy.eye(nodes, nodes, 0, int)
   node_memory = numpy.empty(nodes)
   nodes_mapped = numpy.empty(nodes)
   prob_connection = 0.5
