@@ -36,32 +36,8 @@ for i in range(0,1):
       if(i == j or random.random() < prob_connection):
         adj_grid[i][j] = 1
         adj_grid[j][i] = 1
-  # print(adj_grid)
+  print(adj_grid)
   print(node_memory)
-
-  # perform bfs to check whether the graph is connected
-  current_node_index = 0
-  nodes_checked = []
-  nodes_checked.append(current_node_index)
-  queue = []
-  queue.append(current_node_index)
-  while queue:
-    current_node_index = queue.pop(0)
-    # print(current_node_index)
-    for i in adj_grid[current_node_index]:
-      if i not in nodes_checked and adj_grid[current_node_index][i] == 1:
-        nodes_checked.append(i)
-        queue.append(i)
-  
-  # now we check which nodes were not covered by bfs
-  for j in range(nodes):
-    if j not in nodes_checked:
-      # connect the node to a random node in the main part of the graph
-      connection_index = math.floor(random.random() * len(nodes_checked))
-      adj_grid[connection_index][j] = 1
-      adj_grid[j][connection_index] = 1
-      # print("connected " + str(j) + " to " + str(connection_index))
-
 
   # greedy algorithm
   # adds the highest possible cost to explore the longest as possible
@@ -82,7 +58,7 @@ for i in range(0,1):
   while(isDone()):
     at_end = False
     expand = False
-    highest_cost = 0
+    lowest_cost = robot_memory
     memory_left = robot_memory
     next_node = 0
     nodes_visited = []
@@ -94,20 +70,17 @@ for i in range(0,1):
     while (not at_end):
       # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
       possible_next_nodes = []
-      # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
       for j in nodes_visited:
         for i in range(0,nodes):
-          if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left and nodes_mapped[i] != 1):
-            # add number to array
+          if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and (node_memory[i] <= memory_left) and (nodes_mapped[i] != 1)):
             possible_next_nodes.append(i)
-      
       # if robot has enough memory to go to the selected node and robot has not visited it already
       if (len(possible_next_nodes) > 0):
-        highest_cost = node_memory[possible_next_nodes[0]]
+        lowest_cost = node_memory[possible_next_nodes[0]]
         next_node = possible_next_nodes[0]
         for i in possible_next_nodes:
-          if(highest_cost < node_memory[i]):
-            highest_cost = node_memory[i]
+          if(lowest_cost > node_memory[i]): # using prims algorithm to approximate the j-mst
+            lowest_cost = node_memory[i]
             next_node = i
         nodes_visited.append(next_node)
         nodes_mapped[next_node] = 1
@@ -120,10 +93,6 @@ for i in range(0,1):
       else:
           at_end = True
           print("robot-" + str(robot)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
-          #print(nodes_mapped)
           robot += 1
-          # print("Not enough memory left, done with path at node " + str(current_node))
-          # print("Available memory left: " + str(memory_left))
-          # print(adj_grid[current_node])
           print("Path: " + str(nodes_visited))
           input()
