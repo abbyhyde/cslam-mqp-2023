@@ -1,8 +1,6 @@
 import random, numpy, math, time, logging, threading
 import params, robot_handler
 
-threads = []
-
 #settings params from params.py
 nodes = params.nodes
 robot_memory = params.memory
@@ -11,6 +9,8 @@ random.seed(params.seed)
 
 nodes_mapped = numpy.empty(nodes)
 adj_grid, node_memory = robot_handler.generate()
+signal = threading.Event()
+doneSignal = threading.Event()
 
 def isTravelable(path):
   nodes_visit = []
@@ -30,18 +30,19 @@ def isTravelable(path):
     return True
   return False
 
-def uniform_alg(index, threshold_ct):
+def isDone():
+  for i in nodes_mapped:
+      if(i != 1):
+          return True
+  return False
+
+def uniform_alg(index):
   # will contain the entire uniform alg
   # uniform probabilistic algorithm
   # gives each adj node an equal chance and picks one
   nodes_mapped[0] = 1
   # while not at the end or no more possible options
   start = time.monotonic_ns()
-  # def isDone():
-  #   for i in nodes_mapped:
-  #       if(i != 1):
-  #           return True
-  #   return False
 
   # while(isDone()):
   # print("going back to prev while loop")
@@ -86,8 +87,8 @@ def uniform_alg(index, threshold_ct):
       for i in range(1, len(nodes_mapped)):
           if (i not in nodes_visited and nodes_mapped[i] == 1):
               nodes_visited.append(i)
-              if (threshold_ct == index): 
-                threshold_ct += 1
+              if (signal.is_set() == False): 
+                signal.set()
     else:
       at_end = True
       # print("robot-" + str(robot)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
@@ -97,9 +98,8 @@ def uniform_alg(index, threshold_ct):
       # print("Available memory left: " + str(memory_left))
       # print(adj_grid[current_node])
       print("Robot " + str(index) + "'s path: " + str(nodes_visited))
-        # input()
-  # print("      Robot " + str(index) + " done")
+  signal.clear()
+  if (not isDone()):
+    doneSignal.set()
 
-robot_handler.run_next_robot(uniform_alg)
-
-# robot_handler.join_robots(threads)
+robot_handler.run_next_robot(uniform_alg,signal,doneSignal)
