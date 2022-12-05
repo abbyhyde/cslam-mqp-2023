@@ -48,7 +48,6 @@ def uniform_alg(index, threshold_ct):
   # mapping the path
   at_end = False
   expand = False
-  highest_cost = 0
   memory_left = robot_memory
   next_node = 0
   current_node = 0
@@ -72,34 +71,12 @@ def uniform_alg(index, threshold_ct):
     # print(possible_next_nodes)
     
     # if robot has enough memory to go to the selected node and robot has not visited it already
-    """
-    if there are possible next nodes:
-      while there are possible next nodes
-        randomly pick one
-        if the node memory is not the highest cost
-          make it the next node
-        else
-          remove from possible next nodes list
-      here if ran out of nodes
-      pick one from the visited nodes and make it the next node
-    """
-    size = len(possible_next_nodes)
-    if (size > 0):
+    if (len(possible_next_nodes) > 0):
       # print("Robot " + str(index) + " where we want")
-      while(size > 0):
-        next_node = possible_next_nodes[math.floor(random.random()*size)]
-        # print(str(size) + "   " + str(next_node))
-        if(highest_cost < node_memory[next_node] and nodes_mapped[next_node] != 1):
-          highest_cost = node_memory[next_node]
-          break
-        else:    
-          # print("removing node " + str(next_node))
-          possible_next_nodes.remove(next_node)
-          size = len(possible_next_nodes)
+      next_node = possible_next_nodes[math.floor(random.random()*size)]
       nodes_visited.append(next_node)
       nodes_mapped[next_node] = 1
       memory_left -= node_memory[next_node]
-      highest_cost = 0
       if (threshold_ct == index): 
         threshold_ct += 1
       # print("remaining memory: " + str(memory_left))
