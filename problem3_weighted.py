@@ -32,7 +32,7 @@ def weighted_alg(index, threshold_ct):
     # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
     for j in nodes_visited:
       for i in range(0,nodes):
-        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left and (i not in possible_next_nodes)):
+        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left and nodes_mapped[i] != 1):
           # add number to array
           possible_next_nodes.append(i)
     # if robot has enough memory to go to the selected node and robot has not visited it already

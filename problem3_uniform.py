@@ -64,7 +64,7 @@ def uniform_alg(index):
     # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
     for j in nodes_visited:
       for i in range(0,nodes):
-        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left and (i not in possible_next_nodes)):
+        if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left and nodes_mapped[i] != 1):
           # add number to array
           possible_next_nodes.append(i)
     # print(nodes_visited)
