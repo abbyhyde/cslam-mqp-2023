@@ -1,9 +1,6 @@
 import random, numpy, math, time, logging, threading
 import params, robot_handler
 
-threads = []
-signal = threading.Event()
-
 #settings params from params.py
 nodes = params.nodes
 robot_memory = params.memory
@@ -12,6 +9,8 @@ random.seed(params.seed)
 
 nodes_mapped = numpy.empty(nodes)
 adj_grid, node_memory = robot_handler.generate()
+signal = threading.Event()
+doneSignal = threading.Event()
 
 def isTravelable(path):
   nodes_visit = []
@@ -31,6 +30,12 @@ def isTravelable(path):
     return True
   return False
 
+def isDone():
+  for i in nodes_mapped:
+      if(i != 1):
+          return True
+  return False
+
 def uniform_alg(index):
   # will contain the entire uniform alg
   # uniform probabilistic algorithm
@@ -38,11 +43,6 @@ def uniform_alg(index):
   nodes_mapped[0] = 1
   # while not at the end or no more possible options
   start = time.monotonic_ns()
-  # def isDone():
-  #   for i in nodes_mapped:
-  #       if(i != 1):
-  #           return True
-  #   return False
 
   # while(isDone()):
   # print("going back to prev while loop")
@@ -122,5 +122,7 @@ def uniform_alg(index):
       # print(adj_grid[current_node])
       print("Robot " + str(index) + "'s path: " + str(nodes_visited))
   signal.clear()
+  if (not isDone()):
+    doneSignal.set()
 
-robot_handler.run_next_robot(uniform_alg,signal)
+robot_handler.run_next_robot(uniform_alg,signal,doneSignal)
