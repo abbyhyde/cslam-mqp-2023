@@ -2,6 +2,7 @@ import random, numpy, math, time, logging, threading
 import params, robot_handler
 
 threads = []
+signal = threading.Event()
 
 #settings params from params.py
 nodes = params.nodes
@@ -30,7 +31,7 @@ def isTravelable(path):
     return True
   return False
 
-def uniform_alg(index, threshold_ct):
+def uniform_alg(index):
   # will contain the entire uniform alg
   # uniform probabilistic algorithm
   # gives each adj node an equal chance and picks one
@@ -100,8 +101,8 @@ def uniform_alg(index, threshold_ct):
       nodes_mapped[next_node] = 1
       memory_left -= node_memory[next_node]
       highest_cost = 0
-      if (threshold_ct == index): 
-        threshold_ct += 1
+      if (signal.is_set() == False): 
+        signal.set()
       # print("remaining memory: " + str(memory_left))
     elif(not expand):
       # print("Robot " + str(index) + " again this is fine")
@@ -109,8 +110,8 @@ def uniform_alg(index, threshold_ct):
       for i in range(1, len(nodes_mapped)):
           if (i not in nodes_visited and nodes_mapped[i] == 1):
               nodes_visited.append(i)
-              if (threshold_ct == index): 
-                threshold_ct += 1
+              if (signal.is_set() == False): 
+                signal.set()
     else:
       at_end = True
       # print("robot-" + str(robot)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
@@ -120,9 +121,6 @@ def uniform_alg(index, threshold_ct):
       # print("Available memory left: " + str(memory_left))
       # print(adj_grid[current_node])
       print("Robot " + str(index) + "'s path: " + str(nodes_visited))
-        # input()
-  # print("      Robot " + str(index) + " done")
+  signal.clear()
 
-robot_handler.run_next_robot(uniform_alg)
-
-# robot_handler.join_robots(threads)
+robot_handler.run_next_robot(uniform_alg,signal)

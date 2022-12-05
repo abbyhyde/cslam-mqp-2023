@@ -48,23 +48,21 @@ def generate():
             # print("connected " + str(j) + " to " + str(connection_index))
     return adj_grid, node_memory
 
-def run_next_robot(algorithm):
+def run_next_robot(algorithm,signal):
     # start robots
     threads = []
     # join robot threads to make sure they complete
 
     # runs all robots
     index = 0
-    threshold_ct = 0
     while (index < robots):
         print("     Main: create and start robot " + str(index))
-        new_thread = threading.Thread(target=algorithm, args=(index,threshold_ct,))
+        new_thread = threading.Thread(target=algorithm, args=(index,))
         new_thread.start()
         threads.append(new_thread)
         index += 1
-        # print(str(threshold_ct) + " " + str(index))
-        # while (threshold_ct < count):
-        #   time.sleep(0.1)
+        signal.wait(timeout=60.0)
+
     for index, thread in enumerate(threads):
         thread.join()
         print("     Main: done with robot " + str(index))
