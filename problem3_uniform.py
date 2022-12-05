@@ -1,4 +1,4 @@
-import random, numpy, math, time, logging, threading
+import random, numpy, math, time, threading
 import params, robot_handler
 
 #settings params from params.py
@@ -44,8 +44,6 @@ def uniform_alg(index):
   # while not at the end or no more possible options
   start = time.monotonic_ns()
 
-  # while(isDone()):
-  # print("going back to prev while loop")
   # mapping the path
   at_end = False
   expand = False
@@ -54,7 +52,6 @@ def uniform_alg(index):
   current_node = 0
   nodes_visited = []
   possible_next_nodes = []
-  pick = 0
   nodes_visited.append(current_node)
   # while not at the end or no more possible options
   start = time.monotonic_ns()
@@ -67,22 +64,17 @@ def uniform_alg(index):
         if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left and (i not in possible_next_nodes)):
           # add number to array
           possible_next_nodes.append(i)
-    # print(nodes_visited)
-    # print(nodes_mapped)
-    # print(possible_next_nodes)
     
     # if robot has enough memory to go to the selected node and robot has not visited it already
     if (len(possible_next_nodes) > 0):
       # print("Robot " + str(index) + " where we want")
-      next_node = possible_next_nodes[math.floor(random.random()*size)]
+      next_node = possible_next_nodes[math.floor(random.random()*len(possible_next_nodes))]
       nodes_visited.append(next_node)
-      nodes_mapped[next_node] = 1
       memory_left -= node_memory[next_node]
-      if (threshold_ct == index): 
-        threshold_ct += 1
-      # print("remaining memory: " + str(memory_left))
+      highest_cost = 0
+      if (signal.is_set() == False): 
+        signal.set()
     elif(not expand):
-      # print("Robot " + str(index) + " again this is fine")
       expand = True
       for i in range(1, len(nodes_mapped)):
           if (i not in nodes_visited and nodes_mapped[i] == 1):
@@ -91,14 +83,15 @@ def uniform_alg(index):
                 signal.set()
     else:
       at_end = True
-      # print("robot-" + str(robot)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
       print("Robot " + str(index) + ": " + str(robot_memory - memory_left))
       # print(nodes_mapped)
       # print("Not enough memory left, done with path at node " + str(current_node))
       # print("Available memory left: " + str(memory_left))
-      # print(adj_grid[current_node])
       print("Robot " + str(index) + "'s path: " + str(nodes_visited))
   signal.clear()
+  # mark which nodes are mapped after returning to base
+  for i in nodes_visited:
+    nodes_mapped[i] = 1
   if (not isDone()):
     doneSignal.set()
 

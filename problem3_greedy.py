@@ -1,4 +1,4 @@
-import random, numpy, math, time, logging
+import random, numpy, math, time, threading
 import params, robot_handler
 
 nodes = params.nodes
@@ -8,8 +8,16 @@ random.seed(params.seed)
 
 nodes_mapped = numpy.empty(nodes)
 adj_grid, node_memory = robot_handler.generate()
+signal = threading.Event()
+doneSignal = threading.Event()
 
-def greedy_alg(index, threshold_ct):
+def isDone():
+  for i in nodes_mapped:
+      if(i != 1):
+          return True
+  return False
+
+def greedy_alg(index):
   # greedy algorithm
   # adds the highest possible cost to explore the longest as possible
 
@@ -45,11 +53,15 @@ def greedy_alg(index, threshold_ct):
       nodes_visited.append(next_node)
       nodes_mapped[next_node] = 1
       memory_left -= node_memory[next_node]
+      if (signal.is_set() == False): 
+        signal.set()
     elif(not expand):
       expand = True
       for i in range(1, len(nodes_mapped)):
         if (i not in nodes_visited and nodes_mapped[i] == 1):
           nodes_visited.append(i)
+          if (signal.is_set() == False): 
+            signal.set()
     else:
         at_end = True
         print("robot-" + str(index)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
@@ -58,5 +70,11 @@ def greedy_alg(index, threshold_ct):
         # print("Available memory left: " + str(memory_left))
         # print(adj_grid[current_node])
         print("Path: " + str(nodes_visited))
+  signal.clear()
+  # mark which nodes are mapped after returning to base
+  for i in nodes_visited:
+    nodes_mapped[i] = 1
+  if (not isDone()):
+    doneSignal.set()
 
-robot_handler.run_next_robot(greedy_alg)
+robot_handler.run_next_robot(greedy_alg,signal,doneSignal)
