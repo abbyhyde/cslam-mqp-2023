@@ -115,6 +115,8 @@ class Robot:
                     value = self.edge_tracker[edge]
                     if(value == 0): #if an edge is new we traverse it
                         #if node isnt mapped add set it's memory to memory left to map
+                        if (self.curr_node in self.nodes_to_visit):
+                            self.memory_left_to_map += node_memory[self.curr_node]
                         self.curr_node = edge[0] if self.curr_node == edge[1] else edge[1]
                         self.edge_tracker[edge] = 1 #mark that we traversed it
                         return False
@@ -140,35 +142,39 @@ def holdAuction():
     robot_index = 0
     node_index = 0
     robots_full = 0
+    # assign nodes as long as there are nodes left to assign and there are robots that don't have full memory
     while(node_index < num_nodes or robots_full < num_robots):
         if (nodes[node_index] == Robot_State.NOT_CLAIMED):
-            if (robots[robot_index].memory_left > node_memory[node_index]):
-                # robots[robot_index].unmapped.append(nodes[node_index])
+            if (robots[robot_index].memory_left_to_map > node_memory[node_index]):
+                robots[robot_index].nodes_to_visit.append(nodes[node_index])
                 nodes[node_index] = Robot_State.CLAIMED
-                # subtract memory
+                # recalculate memory ?
                 # if robot is full of memory, add to robots_full
+                if (robots[robot_index].memory_usage <= 0):
+                    robots_full += 1
             else: 
+                # go on to next robot (or back to first robot if at end)
                 robot_index += 1 % num_robots
         else:
             node_index += 1
 
 def run_all_robots(algorithm):
     for r in num_robots:
-        # create robot and append to robots and mark them all as participating in the first auction
-        print(r)
+        # create robot and append to robots
+        newRobot = Robot(r, algorithm, params.memory)
+        robots[r] = newRobot
     while(not done()):
         holdAuction()
         for i in range(num_robots):
-            # back = robots[i].turn()
+            back = robots[i].act()
             # if robot is done, parse all nodes from the robot and label accordingly
-            # if(back)
-                # for node in robots[i].unmapped:
-                #   nodes[node] = Robot_State.UNCLAIMED
-                #   to_claim += 1
-                #   robots[i].unmapped.remove(node)
-                # for node in robots[i].mapped:
-                #   nodes[node] = Robot_State.MAPPED
-                # mark robot as participating in next auction
-            print(i)
+            if(back):
+                for node in robots[i].nodes_to_visit:
+                    nodes[node] = Robot_State.NOT_CLAIMED
+                    robots[i].nodes_to_visit.remove(node)
+                for node in robots[i].nodes_visited:
+                    nodes[node] = Robot_State.MAPPED
 
         # path plan for all the robots who just participated in the auction
+        for r in robots:
+            r.pick()
