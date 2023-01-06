@@ -109,7 +109,7 @@ class Robot:
         else: #robot moves
             if(self.curr_node == -1): #move onto the graph (node 0)
                 self.curr_node = 0
-                if (#check if self.curr_node has been mapped):
+                if (nodes[self.curr_node] == Robot_State.MAPPED):
                     self.memory_left_to_map = node_memory[self.curr_node]
                 return False, None 
             escape_edge = None 
@@ -119,7 +119,7 @@ class Robot:
                     value = self.edge_tracker[edge]
                     if(value == 0): #if an edge is new we traverse it
                         self.curr_node = edge[0] if self.curr_node == edge[1] else edge[1]
-                        if (#check if self.curr_node has been mapped):
+                        if (nodes[self.curr_node] == Robot_State.MAPPED):
                             self.memory_left_to_map = node_memory[self.curr_node]
                         self.edge_tracker[edge] = 1 #mark that we traversed it
                         return False
@@ -155,7 +155,6 @@ def holdAuction():
             if (robots[robot_index].memory_left_to_map > node_memory[node_index]):
                 robots[robot_index].nodes_to_visit.append(nodes[node_index])
                 nodes[node_index] = Robot_State.CLAIMED
-                # recalculate memory ?
                 # if robot is full of memory, add to robots_full
                 if (robots[robot_index].memory_usage <= 0):
                     robots_full += 1
