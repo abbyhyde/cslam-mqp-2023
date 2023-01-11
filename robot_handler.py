@@ -122,7 +122,7 @@ class Robot:
                         if (nodes[self.curr_node] == Robot_State.MAPPED):
                             self.memory_left_to_map = node_memory[self.curr_node]
                         self.edge_tracker[edge] = 1 #mark that we traversed it
-                        return False
+                        return False, None
                     elif(value == 1):
                         escape_edge = edge
             if escape_edge is not None:
