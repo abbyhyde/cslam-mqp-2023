@@ -27,7 +27,7 @@ def generate():
     prob_connection = 0.5
     for i in range(0,num_nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
         rfloat = random.random()
-        node_memory[i] = (robot_memory/1.5)*rfloat
+        node_memory[i] = math.ceil((robot_memory/1.5)*rfloat)
         for j in range(i,num_nodes):
             if(i == j or random.random() < prob_connection):
                 adj_grid[i][j] = 1
@@ -132,7 +132,7 @@ class Robot:
             return False, None
 
     def pick(self):
-        self.nodes_to_visit, result = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory)
+        self.nodes_to_visit, result = self.algorithm(adj_grid, node_memory, self.memory_left_to_map self.nodes_to_visit, self.max_memory, nodes)
         #when done set up edgetracker
         return result, self.nodes_to_visit
 
@@ -143,44 +143,44 @@ def done():
             return False
     return True
 
-def holdAuction():
+def holdAuction(robots_in_auction):
     # for every node in the list, assign a robot
     # unless every robot has possible memory filled
-    robot_index = 0
-    node_index = 0
+    auction_index = 0
     robots_full = 0
     # assign nodes as long as there are nodes left to assign and there are robots that don't have full memory
-    while(node_index < num_nodes or robots_full < num_robots):
-        if (nodes[node_index] == Robot_State.NOT_CLAIMED):
-            if (robots[robot_index].memory_left_to_map > node_memory[node_index]):
-                robots[robot_index].nodes_to_visit.append(nodes[node_index])
+    while(count_unclaimed() > 0 and robots_full < len(robots_in_auction)):
+        full, nodes_claimed = robots[robots_in_auction[auction_index]].pick()
+        if full:
+            robots_full += 1
+        for node_index in nodes_claimed:
+            if(nodes[node_index] == Robot_State.NOT_CLAIMED):
                 nodes[node_index] = Robot_State.CLAIMED
-                # if robot is full of memory, add to robots_full
-                if (robots[robot_index].memory_usage <= 0):
-                    robots_full += 1
-            else: 
-                # go on to next robot (or back to first robot if at end)
-                robot_index += 1 % num_robots
-        else:
-            node_index += 1
+        auction_index += 1 % len(robots_in_auction)
+
+def count_unclaimed():
+    count = 0
+    for node in nodes:
+        if node = Robot_State.NOT_CLAIMED:
+            count += 1
+    return count
 
 def run_all_robots(algorithm):
-    for r in num_robots:
+    for r in range(num_robots):
         # create robot and append to robots
         newRobot = Robot(r, algorithm, params.memory)
         robots[r] = newRobot
+    robots_in_auction = range(num_robots)
     while(not done()):
-        holdAuction()
+        holdAuction(robots_in_auction)
+        robots_in_auction = []
         for i in range(num_robots):
             back = robots[i].act()
             # if robot is done, parse all nodes from the robot and label accordingly
             if(back):
+                robots_in_auction.add(i)
                 for node in robots[i].nodes_to_visit:
                     nodes[node] = Robot_State.NOT_CLAIMED
                     robots[i].nodes_to_visit.remove(node)
                 for node in robots[i].nodes_visited:
                     nodes[node] = Robot_State.MAPPED
-
-        # path plan for all the robots who just participated in the auction
-        for r in robots:
-            r.pick()

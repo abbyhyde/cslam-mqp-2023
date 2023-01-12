@@ -1,0 +1,26 @@
+import params, robot_handler
+nodes = params.nodes
+robot_memory = params.memory
+robots = params.robots
+random.seed(params.seed)
+
+def greedy_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
+    greatest_node_memory = -1
+    greatest_node_index = -1
+    memory_to_map = 0
+    for node_index in nodes_to_visit:
+        memory_to_map += node_memory[node_index]
+    for node_index in range(len(node_memory)):
+        if(nodes[i] == Robot_State.CLAIMED and memory_to_map + node_memory[node_index] <= max_memory
+            and greatest_node_memory > node_memory[node_index]):
+            greatest_node_memory = node_memory[node_index]
+            greatest_node_index = node_index
+    if(greatest_node_index >= 0):
+        nodes_to_visit.add(greatest_node_index)
+        return nodes_to_visit, False
+    else:
+        return nodes_to_visit, True
+
+
+robot_handler.generate()
+robot_handler.run_all_robots(greedy_alg)
