@@ -97,7 +97,7 @@ class Robot:
         self.edge_tracker = dict()
         self.curr_node = -1 # -1 means outside the graph, robots always enter into node 0
         
-    def act(self): # warning does not add new nodes it discovers yet if they can fit
+    def act(self): # warning does not add new nodes it discovers yet if they can fit needs to do this for it to work
         if(self.curr_node == -1 and len(self.nodes_to_visit) == 0): #if the robot is at the base with nothing to do
             self.memory_left_to_map = 0
             self.memory_usage = 0
@@ -132,8 +132,10 @@ class Robot:
             return False, None
 
     def pick(self):
-        self.nodes_to_visit, result = self.algorithm(adj_grid, node_memory, self.memory_left_to_map self.nodes_to_visit, self.max_memory, nodes)
-        #when done set up edgetracker
+        self.nodes_to_visit, result = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
+        if result:
+            #find the edges it needs to reach the new edges #may need to do this every time we pick if we want to conisder the memory of all nodes
+            #when done set up edgetracker 
         return result, self.nodes_to_visit
 
 def done():
