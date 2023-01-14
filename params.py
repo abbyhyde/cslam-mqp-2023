@@ -4,6 +4,6 @@ the random generation for every algorithm. The random numbers generated will be 
 """
 
 seed = 1
-num_nodes = 20
+num_nodes = 5
 memory = 10
-robots = 3
+robots = 2

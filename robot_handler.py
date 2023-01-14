@@ -17,7 +17,9 @@ class Robot_State(Enum):
     CLAIMED = 2
     MAPPED = 3
 
-nodes = numpy.zeros(num_nodes)
+nodes = []
+for i in range(num_nodes):
+    nodes.append(Robot_State.NOT_ENCOUNTERED)
 nodes[0] = Robot_State.NOT_CLAIMED
 adj_grid = numpy.eye(num_nodes, num_nodes, 0, int)
 node_memory = numpy.empty(num_nodes)
@@ -88,7 +90,7 @@ def run_next_robot(algorithm,signal,doneSignal):
 class Robot:
     def __init__(self, id, alg, max_memory):
         self.id = id
-        self.alg = alg
+        self.algorithm = alg
         self.max_memory = max_memory
         self.memory_usage = 0
         self.nodes_to_visit = []
@@ -101,6 +103,7 @@ class Robot:
         if(self.curr_node == -1 and len(self.nodes_to_visit) == 0): #if the robot is at the base with nothing to do
             self.memory_left_to_map = 0
             self.memory_usage = 0
+            self.nodes_to_visit.append(0)
             return True, self.nodes_visited #returns the true that it wants to be included in the auction
         elif(self.memory_left_to_map > 0 and self.memory_usage + 1 < self.max_memory): #if the robot is still mapping a node
             self.memory_left_to_map -= 1
@@ -132,11 +135,48 @@ class Robot:
             return False, None
 
     def pick(self):
-        self.nodes_to_visit, result = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
+        new_node_to_visit, result = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
+        nodes_between = None
         if result:
-            #find the edges it needs to reach the new edges #may need to do this every time we pick if we want to conisder the memory of all nodes
-            #when done set up edgetracker 
+            self.edge_tracker = dict()
+            for i in range(len(nodes)):
+                for j in range(i+1,len(nodes)):
+                    if i in self.nodes_to_visit and j in self.nodes_to_visit and adj_grid[i][j] == 1:
+                        self.edge_tracker[(i,j)] = 0
+        else:
+            for origin_node in self.nodes_to_visit:
+                if(origin_node == Robot_State.MAPPED):
+                    new_nodes_between = bfs(origin_node, new_node_to_visit)
+                    if new_nodes_between is not None and len(new_nodes_between) < len(nodes_between):
+                        nodes_between = new_nodes_between
+            if(nodes_between is not None):
+                self.nodes_to_visit.extend(nodes_between)
         return result, self.nodes_to_visit
+
+    def bfs(start, end): # tries to find a path from start to end using known nodes
+        current_node_index = start
+        nodes_checked = []
+        nodes_checked.append(current_node_index)
+        connections = dict()
+        queue = []
+        queue.append(current_node_index)
+        while queue:
+            current_node_index = queue.pop(0)
+            # print(current_node_index)
+            for i in adj_grid[current_node_index]:
+                if i not in nodes_checked and adj_grid[current_node_index][i] == 1 and nodes[i] == Robot_State.MAPPED:
+                    if i != end:
+                        nodes_checked.append(i)
+                        queue.append(i)
+                        connections[i] = current_node_index
+                    else:
+                        nodes_between = [i]
+                        while current_node_index != start:
+                            node_between.append(current_node_index)
+                            current_node_index = connection[current_node_index]
+                        return nodes_between
+        return None
+
 
 def done():
     # run through all node states and check if they've been mapped
@@ -158,12 +198,12 @@ def holdAuction(robots_in_auction):
         for node_index in nodes_claimed:
             if(nodes[node_index] == Robot_State.NOT_CLAIMED):
                 nodes[node_index] = Robot_State.CLAIMED
-        auction_index += 1 % len(robots_in_auction)
+        auction_index = (auction_index + 1) % len(robots_in_auction)
 
 def count_unclaimed():
     count = 0
     for node in nodes:
-        if node = Robot_State.NOT_CLAIMED:
+        if node == Robot_State.NOT_CLAIMED:
             count += 1
     return count
 
@@ -171,7 +211,7 @@ def run_all_robots(algorithm):
     for r in range(num_robots):
         # create robot and append to robots
         newRobot = Robot(r, algorithm, params.memory)
-        robots[r] = newRobot
+        robots.append(newRobot)
     robots_in_auction = range(num_robots)
     while(not done()):
         holdAuction(robots_in_auction)
@@ -185,4 +225,7 @@ def run_all_robots(algorithm):
                     nodes[node] = Robot_State.NOT_CLAIMED
                     robots[i].nodes_to_visit.remove(node)
                 for node in robots[i].nodes_visited:
-                    nodes[node] = Robot_State.MAPPED
+                    nodes[node] = Robot_State.MAPPED # the neighbors of this need to be added to not_claimed
+                    for j in range(len[nodes]):
+                        if adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED:
+                            nodes[j] = Robot_State.NOT_CLAIMED # addind the new nodes at the frontier to not being claimed
