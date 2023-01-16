@@ -103,18 +103,21 @@ class Robot:
         if(self.curr_node == -1 and len(self.nodes_to_visit) == 0): #if the robot is at the base with nothing to do
             self.memory_left_to_map = 0
             self.memory_usage = 0
-            self.nodes_to_visit.append(0)
-            return True, self.nodes_visited #returns the true that it wants to be included in the auction
+            return True #returns the true that it wants to be included in the auction
         elif(self.memory_left_to_map > 0 and self.memory_usage + 1 < self.max_memory): #if the robot is still mapping a node
             self.memory_left_to_map -= 1
             self.memory_usage += 1
-            return False, None #does not want to be included in the auction
+            return False #does not want to be included in the auction
         else: #robot moves
             if(self.curr_node == -1): #move onto the graph (node 0)
+                self.nodes_visited = []
                 self.curr_node = 0
-                if (nodes[self.curr_node] == Robot_State.MAPPED):
+                if (nodes[self.curr_node] != Robot_State.MAPPED):
                     self.memory_left_to_map = node_memory[self.curr_node]
-                return False, None 
+                return False
+            if self.curr_node in self.nodes_to_visit:
+                self.nodes_to_visit.remove(self.curr_node)
+                self.nodes_visited.append(self.curr_node)
             escape_edge = None 
             valid_edges = list(self.edge_tracker)
             for edge in valid_edges: #trying to find a new edge to traverse before using an old edge. dont use edges more than twice
@@ -125,14 +128,17 @@ class Robot:
                         if (nodes[self.curr_node] == Robot_State.MAPPED):
                             self.memory_left_to_map = node_memory[self.curr_node]
                         self.edge_tracker[edge] = 1 #mark that we traversed it
-                        return False, None
-                    elif(value == 1):
+                        return False
+                    elif(value == 1 and escape_edge is None):
                         escape_edge = edge
             if escape_edge is not None:
                 self.curr_node = escape_edge[0] if self.curr_node == escape_edge[1] else escape_edge[1] # if no new edges, use the escape edge
+                self.edge_tracker[escape_edge] = 2
             else:
                 self.curr_node = -1 #if no escape edges we must be done traversing
-            return False, None
+                self.done = True
+
+            return False
 
     def pick(self):
         new_node_to_visit, result = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
@@ -144,16 +150,21 @@ class Robot:
                     if i in self.nodes_to_visit and j in self.nodes_to_visit and adj_grid[i][j] == 1:
                         self.edge_tracker[(i,j)] = 0
         else:
-            for origin_node in self.nodes_to_visit:
-                if(origin_node == Robot_State.MAPPED):
-                    new_nodes_between = bfs(origin_node, new_node_to_visit)
-                    if new_nodes_between is not None and len(new_nodes_between) < len(nodes_between):
-                        nodes_between = new_nodes_between
-            if(nodes_between is not None):
-                self.nodes_to_visit.extend(nodes_between)
-        return result, self.nodes_to_visit
+            if(new_node_to_visit != 0):
+                if(0 not in self.nodes_to_visit):
+                    self.nodes_to_visit.append(0)
+                for origin_node in self.nodes_to_visit:
+                    if(nodes[origin_node] == Robot_State.MAPPED):
+                        new_nodes_between = self.bfs(origin_node, new_node_to_visit)
+                        if new_nodes_between is not None and (nodes_between is None or len(new_nodes_between) < len(nodes_between)):
+                            nodes_between = new_nodes_between
+                if(nodes_between is not None):
+                    self.nodes_to_visit.extend(nodes_between)
+            else:
+                self.nodes_to_visit.append(new_node_to_visit)
+        return result, new_node_to_visit
 
-    def bfs(start, end): # tries to find a path from start to end using known nodes
+    def bfs(self, start, end): # tries to find a path from start to end using known nodes
         current_node_index = start
         nodes_checked = []
         nodes_checked.append(current_node_index)
@@ -163,8 +174,8 @@ class Robot:
         while queue:
             current_node_index = queue.pop(0)
             # print(current_node_index)
-            for i in adj_grid[current_node_index]:
-                if i not in nodes_checked and adj_grid[current_node_index][i] == 1 and nodes[i] == Robot_State.MAPPED:
+            for i in range(len(nodes)):
+                if (i not in nodes_checked and adj_grid[current_node_index][i] == 1 and nodes[i] == Robot_State.MAPPED) or i == end:
                     if i != end:
                         nodes_checked.append(i)
                         queue.append(i)
@@ -191,13 +202,12 @@ def holdAuction(robots_in_auction):
     auction_index = 0
     robots_full = 0
     # assign nodes as long as there are nodes left to assign and there are robots that don't have full memory
-    while(count_unclaimed() > 0 and robots_full < len(robots_in_auction)):
-        full, nodes_claimed = robots[robots_in_auction[auction_index]].pick()
+    while(robots_full < len(robots_in_auction)):
+        full, node_claimed = robots[robots_in_auction[auction_index]].pick()
         if full:
             robots_full += 1
-        for node_index in nodes_claimed:
-            if(nodes[node_index] == Robot_State.NOT_CLAIMED):
-                nodes[node_index] = Robot_State.CLAIMED
+        if node_claimed is not None:
+            nodes[node_claimed] = Robot_State.CLAIMED
         auction_index = (auction_index + 1) % len(robots_in_auction)
 
 def count_unclaimed():
@@ -220,12 +230,12 @@ def run_all_robots(algorithm):
             back = robots[i].act()
             # if robot is done, parse all nodes from the robot and label accordingly
             if(back):
-                robots_in_auction.add(i)
+                robots_in_auction.append(i)
                 for node in robots[i].nodes_to_visit:
                     nodes[node] = Robot_State.NOT_CLAIMED
                     robots[i].nodes_to_visit.remove(node)
                 for node in robots[i].nodes_visited:
                     nodes[node] = Robot_State.MAPPED # the neighbors of this need to be added to not_claimed
-                    for j in range(len[nodes]):
-                        if adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED:
-                            nodes[j] = Robot_State.NOT_CLAIMED # addind the new nodes at the frontier to not being claimed
+                    for j in range(len(nodes)):
+                        if (adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED):
+                            nodes[j] = Robot_State.NOT_CLAIMED # adding the new nodes at the frontier to not being claimed
