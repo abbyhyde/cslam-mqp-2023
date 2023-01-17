@@ -98,13 +98,16 @@ class Robot:
         self.memory_left_to_map = 0
         self.edge_tracker = dict()
         self.curr_node = -1 # -1 means outside the graph, robots always enter into node 0
+    
+    def __str__(self):
+        return "id: " + str(self.id) + " memory usage: " + str(self.memory_usage) + " nodes to visit: " + str(self.nodes_to_visit)
         
     def act(self): # warning does not add new nodes it discovers yet if they can fit needs to do this for it to work
         if(self.curr_node == -1 and len(self.nodes_to_visit) == 0): #if the robot is at the base with nothing to do
             self.memory_left_to_map = 0
             self.memory_usage = 0
             return True #returns the true that it wants to be included in the auction
-        elif(self.memory_left_to_map > 0 and self.memory_usage + 1 < self.max_memory): #if the robot is still mapping a node
+        elif(self.memory_left_to_map > 0 and self.memory_usage + node_memory[self.curr_node] < self.max_memory): #if the robot is still mapping a node
             self.memory_left_to_map -= 1
             self.memory_usage += 1
             return False #does not want to be included in the auction
@@ -115,7 +118,8 @@ class Robot:
                 if (nodes[self.curr_node] != Robot_State.MAPPED):
                     self.memory_left_to_map = node_memory[self.curr_node]
                 return False
-            if self.curr_node in self.nodes_to_visit:
+            new_node = self.curr_node in self.nodes_to_visit
+            if new_node:
                 self.nodes_to_visit.remove(self.curr_node)
                 self.nodes_visited.append(self.curr_node)
             escape_edge = None 
@@ -125,7 +129,7 @@ class Robot:
                     value = self.edge_tracker[edge]
                     if(value == 0): #if an edge is new we traverse it
                         self.curr_node = edge[0] if self.curr_node == edge[1] else edge[1]
-                        if (nodes[self.curr_node] == Robot_State.MAPPED):
+                        if (nodes[self.curr_node] != Robot_State.MAPPED and new_node):
                             self.memory_left_to_map = node_memory[self.curr_node]
                         self.edge_tracker[edge] = 1 #mark that we traversed it
                         return False
@@ -183,8 +187,8 @@ class Robot:
                     else:
                         nodes_between = [i]
                         while current_node_index != start:
-                            node_between.append(current_node_index)
-                            current_node_index = connection[current_node_index]
+                            nodes_between.append(current_node_index)
+                            current_node_index = connections[current_node_index]
                         return nodes_between
         return None
 
@@ -223,7 +227,15 @@ def run_all_robots(algorithm):
         newRobot = Robot(r, algorithm, params.memory)
         robots.append(newRobot)
     robots_in_auction = range(num_robots)
+    round = 0
     while(not done()):
+        print("round: "+ str(round))
+        round += 1
+        print("nodes: " + str (nodes))
+        robot_string = ""
+        for robot in robots:
+            robot_string = robot_string + "\n" + str(robot)
+        print("robots: " + robot_string)
         holdAuction(robots_in_auction)
         robots_in_auction = []
         for i in range(num_robots):
@@ -239,3 +251,10 @@ def run_all_robots(algorithm):
                     for j in range(len(nodes)):
                         if (adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED):
                             nodes[j] = Robot_State.NOT_CLAIMED # adding the new nodes at the frontier to not being claimed
+    print("round: "+ str(round))
+    round += 1
+    print("nodes: " + str (nodes))
+    robot_string = ""
+    for robot in robots:
+        robot_string = robot_string + "\n" + str(robot)
+    print("robots: " + robot_string)
