@@ -20,9 +20,13 @@ def jmst_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
       lowest_node_index = node_index
   
   if(lowest_node_index >= 0):
-    return lowest_node_index, False
+    return lowest_node_index, False, 0
   else:
-    return None, True
+    return None, True, memory_to_map
 
-robot_handler.generate()
-robot_handler.run_all_robots(jmst_alg)
+def main():
+  robot_handler.generate()
+  robot_handler.run_all_robots(jmst_alg)
+
+if __name__ == "__main__":
+    main()

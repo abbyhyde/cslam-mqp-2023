@@ -13,10 +13,6 @@ def weighted_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     # print("start")
     next_node_index = -1
     memory_to_map = 0
-    # print(nodes_to_visit)
-    if (len(nodes_to_visit) < 1):
-        # print("EXITING")
-        return None, False
     # calculate how much memory the robot is mapping this round
     for node_index in nodes_to_visit:
         if(nodes[node_index] != robot_handler.Robot_State.MAPPED): # change this if you want to count previously mapped nodes
@@ -35,11 +31,14 @@ def weighted_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
         next_node_index = 1 + next_node_index
         next_node = possible_nodes[next_node_index]
         choice -= calculateNodeWeight(node_memory, next_node) # remove the next amount of stuff to go through
-      return next_node, False
+      return next_node, False, 0
     else:
-      return None, True
+      return None, True, memory_to_map
 
     
+def main():
+  robot_handler.generate()
+  robot_handler.run_all_robots(weighted_alg)
 
-robot_handler.generate()
-robot_handler.run_all_robots(weighted_alg)
+if __name__ == "__main__":
+    main()

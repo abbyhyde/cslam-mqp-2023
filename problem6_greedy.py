@@ -16,10 +16,13 @@ def greedy_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
             greatest_node_memory = node_memory[node_index]
             greatest_node_index = node_index
     if(greatest_node_index >= 0):
-        return greatest_node_index, False
+        return greatest_node_index, False, 0
     else:
-        return None, True
+        return None, True, memory_to_map
 
+def main():
+    robot_handler.generate()
+    robot_handler.run_all_robots(greedy_alg)
 
-robot_handler.generate()
-robot_handler.run_all_robots(greedy_alg)
+if __name__ == "__main__":
+    main()

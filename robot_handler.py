@@ -26,7 +26,7 @@ node_memory = numpy.empty(num_nodes)
 robots = [] # holds all robot objects
 
 def generate():
-    prob_connection = 0.5
+    prob_connection = 0.4
     for i in range(0,num_nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
         rfloat = random.random()
         node_memory[i] = math.ceil((robot_memory/1.5)*rfloat)
@@ -34,8 +34,8 @@ def generate():
             if(i == j or random.random() < prob_connection):
                 adj_grid[i][j] = 1
                 adj_grid[j][i] = 1
-    # print(adj_grid)
-    # print(node_memory)
+    # #print(adj_grid)
+    # #print(node_memory)
 
     # perform bfs to check whether the graph is connected
     current_node_index = 0
@@ -45,7 +45,7 @@ def generate():
     queue.append(current_node_index)
     while queue:
         current_node_index = queue.pop(0)
-        # print(current_node_index)
+        # #print(current_node_index)
         for i in adj_grid[current_node_index]:
             if i not in nodes_checked and adj_grid[current_node_index][i] == 1:
                 nodes_checked.append(i)
@@ -58,7 +58,7 @@ def generate():
             connection_index = math.floor(random.random() * len(nodes_checked))
             adj_grid[connection_index][j] = 1
             adj_grid[j][connection_index] = 1
-            # print("connected " + str(j) + " to " + str(connection_index))
+            # #print("connected " + str(j) + " to " + str(connection_index))
     return adj_grid, node_memory
 
 def run_next_robot(algorithm,signal,doneSignal):
@@ -67,7 +67,7 @@ def run_next_robot(algorithm,signal,doneSignal):
     index = 0
     while (not doneSignal.is_set()):
         if (len(threads) == index):
-            print("     Main: create and start robot " + str(index))
+            #print("     Main: create and start robot " + str(index))
             new_thread = threading.Thread(target=algorithm, args=(index,))
             threads.append(new_thread)
             new_thread.start()
@@ -75,7 +75,7 @@ def run_next_robot(algorithm,signal,doneSignal):
         elif (threads[index].is_alive()):
             continue
         else:
-            print("     Main: restart robot " + str(index))
+            #print("     Main: restart robot " + str(index))
             threads[index] = threading.Thread(target=algorithm, args=(index,))
             new_thread = threads[index]
             new_thread.start()
@@ -84,7 +84,7 @@ def run_next_robot(algorithm,signal,doneSignal):
 
     for index, thread in enumerate(threads):
         thread.join()
-        print("     Main: done with robot " + str(index))
+        #print("     Main: done with robot " + str(index))
 
 
 class Robot:
@@ -145,7 +145,7 @@ class Robot:
             return False
 
     def pick(self):
-        new_node_to_visit, result = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
+        new_node_to_visit, result, memory_usage = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
         nodes_between = None
         if result:
             self.edge_tracker = dict()
@@ -166,7 +166,7 @@ class Robot:
                     self.nodes_to_visit.extend(nodes_between)
             else:
                 self.nodes_to_visit.append(new_node_to_visit)
-        return result, new_node_to_visit
+        return result, new_node_to_visit, memory_usage
 
     def bfs(self, start, end): # tries to find a path from start to end using known nodes
         current_node_index = start
@@ -177,7 +177,7 @@ class Robot:
         queue.append(current_node_index)
         while queue:
             current_node_index = queue.pop(0)
-            # print(current_node_index)
+            # #print(current_node_index)
             for i in range(len(nodes)):
                 if (i not in nodes_checked and adj_grid[current_node_index][i] == 1 and nodes[i] == Robot_State.MAPPED) or i == end:
                     if i != end:
@@ -205,14 +205,18 @@ def holdAuction(robots_in_auction):
     # unless every robot has possible memory filled
     auction_index = 0
     robots_full = 0 
+    memory_usage = []
     # assign nodes as long as there are nodes left to assign and there are robots that don't have full memory
     while(robots_full != math.pow(2,len(robots_in_auction))-1):
-        full, node_claimed = robots[robots_in_auction[auction_index]].pick()
+        full, node_claimed, new_memory_usage = robots[robots_in_auction[auction_index]].pick()
         if full:
+            if(new_memory_usage != 0):
+                memory_usage.append(new_memory_usage)
             robots_full = robots_full | (1<<auction_index)
         if node_claimed is not None:
             nodes[node_claimed] = Robot_State.CLAIMED
         auction_index = (auction_index + 1) % len(robots_in_auction)
+    return memory_usage
 
 def count_unclaimed():
     count = 0
@@ -222,21 +226,34 @@ def count_unclaimed():
     return count
 
 def run_all_robots(algorithm):
+    #reset
+    global num_robots 
+    num_robots = params.robots
+    global nodes 
+    nodes = []
+    for i in range(num_nodes):
+        nodes.append(Robot_State.NOT_ENCOUNTERED)
+    nodes[0] = Robot_State.NOT_CLAIMED
+    global robots 
+    robots = []
     for r in range(num_robots):
         # create robot and append to robots
         newRobot = Robot(r, algorithm, params.memory)
         robots.append(newRobot)
     robots_in_auction = range(num_robots)
     round = 0
+    memory_usage = []
     while(not done()):
-        print("round: "+ str(round))
+        #print("round: "+ str(round))
         round += 1
-        print("nodes: " + str (nodes))
+        #print("nodes: " + str (nodes))
         robot_string = ""
         for robot in robots:
             robot_string = robot_string + "\n" + str(robot)
-        print("robots: " + robot_string)
-        holdAuction(robots_in_auction)
+        #print("robots: " + robot_string)
+        new_usage = holdAuction(robots_in_auction)
+        for value in new_usage:
+            memory_usage.append(value)
         robots_in_auction = []
         for i in range(num_robots):
             back = robots[i].act()
@@ -251,10 +268,11 @@ def run_all_robots(algorithm):
                     for j in range(len(nodes)):
                         if (adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED):
                             nodes[j] = Robot_State.NOT_CLAIMED # adding the new nodes at the frontier to not being claimed
-    print("round: "+ str(round))
+    #print("round: "+ str(round))
     round += 1
-    print("nodes: " + str (nodes))
+    #print("nodes: " + str (nodes))
     robot_string = ""
     for robot in robots:
         robot_string = robot_string + "\n" + str(robot)
-    print("robots: " + robot_string)
+    #print("robots: " + robot_string)
+    return round, memory_usage
