@@ -16,28 +16,15 @@ def uniform_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
         if(nodes[node_index] != robot_handler.Robot_State.MAPPED): # change this if you want to count previously mapped nodes
             memory_to_map += node_memory[node_index]
     # calculate next node based on randomly picking one and checking if it meets qualifications
-    node_found = False
-    nodes_checked = []
-    while (not node_found):
-        next_node_index = math.floor(random.random()*len(nodes))
-        # print(next_node_index)
-        if (len(nodes_checked) == len(nodes_to_visit)):
-            # print("out")
-            return None, True
-        elif (nodes[next_node_index] == robot_handler.Robot_State.NOT_CLAIMED 
-                  and memory_to_map + node_memory[next_node_index] <= max_memory):
-            # print("ok")
-            node_found = True
-            return next_node_index, False
-        elif (next_node_index not in nodes_checked):
-            # print("added " + str(next_node_index))
-            nodes_checked.append(next_node_index)
-        
-  
-    # if(next_node_index >= 0):
-    #     return next_node_index, False
-    # else:
-    #     return None, True
+    possible_nodes = []
+    for node_index in range(len(nodes)):
+        if (nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED):
+            possible_nodes.append(node_index)
+    if(len(possible_nodes) > 0):
+        next_node_index = possible_nodes[math.floor(random.random()*len(possible_nodes))]
+        return next_node_index, False
+    else:
+        return None, True
 
 robot_handler.generate()
 robot_handler.run_all_robots(uniform_alg)
