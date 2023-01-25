@@ -18,7 +18,7 @@ def uniform_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     # calculate next node based on randomly picking one and checking if it meets qualifications
     possible_nodes = []
     for node_index in range(len(nodes)):
-        if (nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED):
+        if (nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED and memory_to_map + node_memory[node_index] <= max_memory):
             possible_nodes.append(node_index)
     if(len(possible_nodes) > 0):
         next_node_index = possible_nodes[math.floor(random.random()*len(possible_nodes))]
