@@ -146,6 +146,7 @@ class Robot:
 
     def pick(self):
         new_node_to_visit, result, memory_usage = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
+        #print("picked node " + str(new_node_to_visit))
         nodes_between = None
         if result:
             self.edge_tracker = dict()
@@ -159,7 +160,7 @@ class Robot:
                     self.nodes_to_visit.append(0)
                 for origin_node in self.nodes_to_visit:
                     if(nodes[origin_node] == Robot_State.MAPPED):
-                        new_nodes_between = self.bfs(origin_node, new_node_to_visit)
+                        new_nodes_between = Robot.bfs(origin_node, new_node_to_visit)
                         if new_nodes_between is not None and (nodes_between is None or len(new_nodes_between) < len(nodes_between)):
                             nodes_between = new_nodes_between
                 if(nodes_between is not None):
@@ -168,7 +169,7 @@ class Robot:
                 self.nodes_to_visit.append(new_node_to_visit)
         return result, new_node_to_visit, memory_usage
 
-    def bfs(self, start, end): # tries to find a path from start to end using known nodes
+    def bfs(start, end): # tries to find a path from start to end using known nodes
         current_node_index = start
         nodes_checked = []
         nodes_checked.append(current_node_index)
