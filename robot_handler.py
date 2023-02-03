@@ -26,7 +26,7 @@ node_memory = numpy.empty(num_nodes)
 robots = [] # holds all robot objects
 
 def generate():
-    prob_connection = 0.4
+    prob_connection = 0.3
     for i in range(0,num_nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
         rfloat = random.random()
         node_memory[i] = math.ceil((robot_memory/1.5)*rfloat)
@@ -46,7 +46,7 @@ def generate():
     while queue:
         current_node_index = queue.pop(0)
         # #print(current_node_index)
-        for i in adj_grid[current_node_index]:
+        for i in range(0, num_nodes):
             if i not in nodes_checked and adj_grid[current_node_index][i] == 1:
                 nodes_checked.append(i)
                 queue.append(i)
@@ -56,8 +56,8 @@ def generate():
         if j not in nodes_checked:
             # connect the node to a random node in the main part of the graph
             connection_index = math.floor(random.random() * len(nodes_checked))
-            adj_grid[connection_index][j] = 1
-            adj_grid[j][connection_index] = 1
+            adj_grid[nodes_checked[connection_index]][j] = 1
+            adj_grid[j][nodes_checked[connection_index]] = 1
             # #print("connected " + str(j) + " to " + str(connection_index))
     return adj_grid, node_memory
 
