@@ -26,7 +26,9 @@ node_memory = numpy.empty(num_nodes)
 robots = [] # holds all robot objects
 
 def generate():
-    prob_connection = 0.3
+    global adj_grid
+    adj_grid = numpy.eye(num_nodes, num_nodes, 0, int)
+    prob_connection = 0.2
     for i in range(0,num_nodes): #assumes the starting node is only connected to the first node add the ability for other nodes to be reached from the start
         rfloat = random.random()
         node_memory[i] = math.ceil((robot_memory/1.5)*rfloat)
@@ -34,9 +36,8 @@ def generate():
             if(i == j or random.random() < prob_connection):
                 adj_grid[i][j] = 1
                 adj_grid[j][i] = 1
-    # #print(adj_grid)
-    # #print(node_memory)
-
+    # print(adj_grid)
+    # print(node_memory)
     # perform bfs to check whether the graph is connected
     current_node_index = 0
     nodes_checked = []
@@ -45,12 +46,11 @@ def generate():
     queue.append(current_node_index)
     while queue:
         current_node_index = queue.pop(0)
-        # #print(current_node_index)
+        # print(current_node_index)
         for i in range(0, num_nodes):
             if i not in nodes_checked and adj_grid[current_node_index][i] == 1:
                 nodes_checked.append(i)
                 queue.append(i)
-    
     # now we check which nodes were not covered by bfs
     for j in range(num_nodes):
         if j not in nodes_checked:
@@ -58,7 +58,8 @@ def generate():
             connection_index = math.floor(random.random() * len(nodes_checked))
             adj_grid[nodes_checked[connection_index]][j] = 1
             adj_grid[j][nodes_checked[connection_index]] = 1
-            # #print("connected " + str(j) + " to " + str(connection_index))
+            nodes_checked.append(j)
+            # print("connected " + str(j) + " to " + str(connection_index))
     return adj_grid, node_memory
 
 def run_next_robot(algorithm,signal,doneSignal):
@@ -96,7 +97,6 @@ class Robot:
         self.nodes_to_visit = []
         self.nodes_visited = []
         self.memory_left_to_map = 0
-        self.edge_tracker = dict()
         self.curr_node = -1 # -1 means outside the graph, robots always enter into node 0
     
     def __str__(self):
@@ -118,26 +118,15 @@ class Robot:
                 if (nodes[self.curr_node] != Robot_State.MAPPED):
                     self.memory_left_to_map = node_memory[self.curr_node]
                 return False
-            new_node = self.curr_node in self.nodes_to_visit
-            if new_node:
-                self.nodes_to_visit.remove(self.curr_node)
-                self.nodes_visited.append(self.curr_node)
-            escape_edge = None 
-            valid_edges = list(self.edge_tracker)
-            for edge in valid_edges: #trying to find a new edge to traverse before using an old edge. dont use edges more than twice
-                if(self.curr_node in edge):
-                    value = self.edge_tracker[edge]
-                    if(value == 0): #if an edge is new we traverse it
-                        self.curr_node = edge[0] if self.curr_node == edge[1] else edge[1]
-                        if (nodes[self.curr_node] != Robot_State.MAPPED and new_node):
-                            self.memory_left_to_map = node_memory[self.curr_node]
-                        self.edge_tracker[edge] = 1 #mark that we traversed it
-                        return False
-                    elif(value == 1 and escape_edge is None):
-                        escape_edge = edge
-            if escape_edge is not None:
-                self.curr_node = escape_edge[0] if self.curr_node == escape_edge[1] else escape_edge[1] # if no new edges, use the escape edge
-                self.edge_tracker[escape_edge] = 2
+            elif len(self.nodes_to_visit) > 0:
+                next_node = Robot.bfs(self.curr_node, self.nodes_to_visit[0])[-1] #should be new next node on the way to the next target node
+                if(next_node == self.nodes_to_visit[0]):
+                    self.nodes_to_visit.remove(next_node)
+                    self.nodes_visited.append(next_node)
+                    self.memory_left_to_map = node_memory[next_node]
+                self.curr_node = next_node
+            elif(self.curr_node != 0):
+                self.curr_node  = Robot.bfs(self.curr_node, 0)[-1]
             else:
                 self.curr_node = -1 #if no escape edges we must be done traversing
                 self.done = True
@@ -147,26 +136,9 @@ class Robot:
     def pick(self):
         new_node_to_visit, result, memory_usage = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
         #print("picked node " + str(new_node_to_visit))
-        nodes_between = None
-        if result:
-            self.edge_tracker = dict()
-            for i in range(len(nodes)):
-                for j in range(i+1,len(nodes)):
-                    if i in self.nodes_to_visit and j in self.nodes_to_visit and adj_grid[i][j] == 1:
-                        self.edge_tracker[(i,j)] = 0
-        else:
-            if(new_node_to_visit != 0):
-                if(0 not in self.nodes_to_visit):
-                    self.nodes_to_visit.append(0)
-                for origin_node in self.nodes_to_visit:
-                    if(nodes[origin_node] == Robot_State.MAPPED):
-                        new_nodes_between = Robot.bfs(origin_node, new_node_to_visit)
-                        if new_nodes_between is not None and (nodes_between is None or len(new_nodes_between) < len(nodes_between)):
-                            nodes_between = new_nodes_between
-                if(nodes_between is not None):
-                    self.nodes_to_visit.extend(nodes_between)
-            else:
-                self.nodes_to_visit.append(new_node_to_visit)
+        if not result:
+            self.nodes_to_visit.append(new_node_to_visit)
+        
         return result, new_node_to_visit, memory_usage
 
     def bfs(start, end): # tries to find a path from start to end using known nodes
@@ -178,9 +150,8 @@ class Robot:
         queue.append(current_node_index)
         while queue:
             current_node_index = queue.pop(0)
-            # #print(current_node_index)
             for i in range(len(nodes)):
-                if (i not in nodes_checked and adj_grid[current_node_index][i] == 1 and nodes[i] == Robot_State.MAPPED) or i == end:
+                if (i not in nodes_checked and adj_grid[current_node_index][i] == 1 and nodes[i] == Robot_State.MAPPED) or (i == end and adj_grid[current_node_index][i] == 1):
                     if i != end:
                         nodes_checked.append(i)
                         queue.append(i)
@@ -228,6 +199,7 @@ def count_unclaimed():
 
 def run_all_robots(algorithm):
     #reset
+    #print(adj_grid)
     global num_robots 
     num_robots = params.robots
     global nodes 

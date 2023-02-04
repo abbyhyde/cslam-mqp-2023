@@ -12,7 +12,7 @@ def main():
     for index in range(len(amount_robots)):
         params.robots = amount_robots[index]
         for i in range(30):
-            robot_handler.generate()
+            adj_grid, memory = robot_handler.generate()
             greedy_trials[index].append(robot_handler.run_all_robots(problem6_greedy.greedy_alg))
             jmst_trials[index].append(robot_handler.run_all_robots(problem6_jmst.jmst_alg))
             uniform_trials[index].append(robot_handler.run_all_robots(problem6_uniform.uniform_alg))
