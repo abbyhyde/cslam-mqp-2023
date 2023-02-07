@@ -98,6 +98,8 @@ class Robot:
         self.nodes_visited = []
         self.memory_left_to_map = 0
         self.curr_node = -1 # -1 means outside the graph, robots always enter into node 0
+        self.path = []
+        self.path.append(0)
     
     def __str__(self):
         return "id: " + str(self.id) + " memory usage: " + str(self.memory_usage) + " nodes to visit: " + str(self.nodes_to_visit)
@@ -123,6 +125,7 @@ class Robot:
                 if(next_node == self.nodes_to_visit[0]):
                     self.nodes_to_visit.remove(next_node)
                     self.nodes_visited.append(next_node)
+                    self.path.append(next_node)
                     self.memory_left_to_map = node_memory[next_node]
                 self.curr_node = next_node
             elif(self.curr_node != 0):
@@ -135,7 +138,7 @@ class Robot:
 
     def pick(self):
         new_node_to_visit, result, memory_usage = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
-        #print("picked node " + str(new_node_to_visit))
+        # print("picked node " + str(new_node_to_visit))
         if not result:
             self.nodes_to_visit.append(new_node_to_visit)
         
@@ -217,13 +220,13 @@ def run_all_robots(algorithm):
     round = 0
     memory_usage = []
     while(not done()):
-        #print("round: "+ str(round))
+        print("round: "+ str(round))
         round += 1
-        #print("nodes: " + str (nodes))
+        print("nodes: " + str (nodes))
         robot_string = ""
         for robot in robots:
             robot_string = robot_string + "\n" + str(robot)
-        #print("robots: " + robot_string)
+        print("robots: " + robot_string)
         new_usage = holdAuction(robots_in_auction)
         for value in new_usage:
             memory_usage.append(value)
@@ -241,11 +244,11 @@ def run_all_robots(algorithm):
                     for j in range(len(nodes)):
                         if (adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED):
                             nodes[j] = Robot_State.NOT_CLAIMED # adding the new nodes at the frontier to not being claimed
-    #print("round: "+ str(round))
+    print("round: "+ str(round))
     round += 1
-    #print("nodes: " + str (nodes))
+    print("nodes: " + str (nodes))
     robot_string = ""
     for robot in robots:
         robot_string = robot_string + "\n" + str(robot)
-    #print("robots: " + robot_string)
+    print("robots: " + robot_string)
     return round, memory_usage

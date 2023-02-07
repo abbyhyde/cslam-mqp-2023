@@ -50,12 +50,19 @@ for r in range(params.robots):
     # print(r)
     print(curr_robot.path)
     path_edges = []
-    for i in range(len(curr_robot.path)):
-        new_edge = (curr_robot.path[i][0], curr_robot.path[i][1])
-        path_edges.append(new_edge)
-        new_edge = (curr_robot.path[i][1], curr_robot.path[i][0])
-        path_edges.append(new_edge)
-    # print(path_edges)
+    for i in range(len(curr_robot.path)-1):
+        if (robot_handler.adj_grid[curr_robot.path[i]][curr_robot.path[i+1]] == 1):
+            new_edge = (curr_robot.path[i], curr_robot.path[i+1])
+            path_edges.append(new_edge)
+            new_edge = (curr_robot.path[i+1], curr_robot.path[i])
+            path_edges.append(new_edge)
+        else:
+            new_edge = (curr_robot.path[i], 0)
+            path_edges.append(new_edge)
+            new_edge = (0, curr_robot.path[i])
+            path_edges.append(new_edge)
+        
+    print(path_edges)
 
     # Plot in matplotlib
     # Note that attributes can be set globally (e.g. vertex_size), or set individually using arrays (e.g. vertex_color)
