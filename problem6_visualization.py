@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 n_vertices = params.num_nodes
 edges = []
 robot_handler.generate()
-robot_handler.run_all_robots(uniform.uniform_alg)
+robot_handler.run_all_robots(greedy.greedy_alg)
 # print(robot_handler.adj_grid)
 for i in range(n_vertices):
     for j in range(n_vertices):
@@ -28,27 +28,26 @@ names = ["entry node 0"]
 for i in range(n_vertices-1):
     names.append("node" + str(i+1))
 g.vs["name"] = names
-# assigns status to each node but doesn't really do anything with the info atm
-status = []
-for j in range(len(robot_handler.nodes)):
-    if robot_handler.nodes[j] == robot_handler.Robot_State.MAPPED:
-        status.append("M")
-    elif robot_handler.nodes[j] == robot_handler.Robot_State.CLAIMED:
-        status.append("C")
-    elif robot_handler.nodes[j] == robot_handler.Robot_State.NOT_CLAIMED:
-        status.append("NC")
-    else:
-        status.append("NE")
-g.vs["status"] = status
 
 # grab results of algorithm after it's done somehow -> path field
 # for each robot make a plot
 for r in range(params.robots): 
-    # generate the edges of the robot's path
     curr_robot = robot_handler.robots[r]
+    # marks each node as having been mapped by the current robot or not
+    status = []
+    # print(robot_handler.nodes)
+    print(curr_robot.path)
+    for j in range(len(robot_handler.nodes)):
+        if (j in curr_robot.path):
+            status.append("Y")
+        else:
+            status.append("N")
+    g.vs["status"] = status
+
+    # generate the edges of the robot's path
     # print("---------")
     # print(r)
-    print(curr_robot.path)
+    # print(curr_robot.path)
     path_edges = []
     for i in range(len(curr_robot.path)-1):
         if (robot_handler.adj_grid[curr_robot.path[i]][curr_robot.path[i+1]] == 1):
@@ -62,7 +61,7 @@ for r in range(params.robots):
             new_edge = (0, curr_robot.path[i])
             path_edges.append(new_edge)
         
-    print(path_edges)
+    # print(path_edges)
 
     # Plot in matplotlib
     # Note that attributes can be set globally (e.g. vertex_size), or set individually using arrays (e.g. vertex_color)
@@ -72,8 +71,7 @@ for r in range(params.robots):
         target=ax,
         layout="circle", # print nodes in a circular layout
         vertex_size=0.1,
-        # vertex_color=ig.RainbowPalette(4).get(),
-        vertex_color="steelblue",
+        vertex_color=["steelblue" if status == "Y" else "salmon" for status in g.vs["status"]],
         vertex_frame_width=4.0,
         vertex_frame_color="white",
         vertex_label=g.vs["name"],
