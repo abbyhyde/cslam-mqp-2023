@@ -5,15 +5,15 @@ import sample_adj_grids_and_memories as sample
 
 mem_used = []
 paths = []
-for i in range(30):
+for i in range(100):
 #settings params from params.py
   nodes = params.num_nodes
   robot_memory = params.memory
   robots = params.robots
   
 
-  adj_grid = sample.adj_grids[i]
-  node_memory = sample.node_memories[i]
+  adj_grid = sample.adj_grids[math.ceil(i/30)%30]
+  node_memory = sample.node_memories[i%30]
         
   #Gurobi code below
 
@@ -64,7 +64,7 @@ for i in range(30):
       if(detectCycles(used_edges)):
         print(path)
         print(used_edges)
-        model.cbLazy(edges.sum() == len(used_edges)-1)
+        model.cbLazy(gp.quicksum(edges[i, j] for i, j in combinations(path, 2))<= len(path)-1)
           
   def detectCycles(edges):
     edges_left = edges.copy()
@@ -114,7 +114,7 @@ for i in range(30):
       
   print('Memory Used: '+ str(total))
   print('Nodes visited: ' + str(path_sol))
-  #print('Edges Traversed: ' + str(used_edges_sol))
+  print('Edges Traversed: ' + str(used_edges_sol))
   mem_used.append(total)
   paths.append(path_sol)
 

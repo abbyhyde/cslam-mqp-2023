@@ -21,15 +21,15 @@ def isTravelable(path):
   return False
 
 mem_used = []
-for i in range(30):
+for i in range(100):
 #settings params from params.py
   nodes = params.num_nodes
   robot_memory = params.memory
   robots = params.robots
   
 
-  adj_grid = sample.adj_grids[i]
-  node_memory = sample.node_memories[i]
+  adj_grid = sample.adj_grids[math.ceil(i/30)%30]
+  node_memory = sample.node_memories[i%30]
 
   # uniform probabilistic algorithm
   # gives each adj node an equal chance and picks one
