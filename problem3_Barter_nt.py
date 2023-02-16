@@ -27,13 +27,13 @@ def calculate_memory(path):
   return total
 
 def index_of_greatest_mem(possible_nodes):
-  highest_cost = node_memory[possible_nodes[0]]
-  next_node = possible_nodes[0]
+  highest_cost = -1
+  new_node = -1
   for i in possible_nodes: #pick nodes greedy
     if(highest_cost < node_memory[i]):
       highest_cost = node_memory[i]
-      next_node = i
-  return next_node
+      new_node = i
+  return new_node
 
       
 
@@ -42,7 +42,7 @@ for k in range(30):
   nodes = len(sample.node_memories[k])
   robot_memory = params.memory
   robots = params.robots
-  nodes_mapped = numpy.empty(nodes)
+  nodes_mapped = numpy.full(nodes, 0).tolist()
 
   adj_grid = sample.adj_grids[k]
   node_memory = sample.node_memories[k]
@@ -52,7 +52,7 @@ for k in range(30):
   start = time.monotonic_ns()
   def isDone():
     for i in nodes_mapped:
-        if(i != 1):
+        if(i < 0.5):
             return True
     return False
 
@@ -63,34 +63,32 @@ for k in range(30):
     at_end = False
     expand = False
     highest_cost = 0
-    memory_left = robot_memory
-    next_node = 0
+    next_node = -1
     nodes_visited = []
     possible_next_nodes = []
-    nodes_visited.append(next_node)
     if(robot == 0 ):
-      memory_left = memory_left - node_memory[0]
+      nodes_visited.append(0)
       nodes_mapped[0] = 1
       
     #consider all visitable nodes except zero
     for j in range(0,nodes):
-      if nodes_mapped[j] == 1:
+      if nodes_mapped[j] > 0.5:
         for i in range(1,nodes):
           if((adj_grid[j][i] == 1)and (j != i) and i not in possible_next_nodes):
             # add number to array
             possible_next_nodes.append(i)
     
     # if robot has enough memory to go to the selected node and robot has not visited it already
-    while(len(possible_next_nodes) > 0 and memory_left > 0):
+    while(len(possible_next_nodes) > 0 and robot_memory - calculate_memory(nodes_visited) > 0):
       next_node = index_of_greatest_mem(possible_next_nodes)
-      if(node_memory[next_node] <= memory_left):
-        if(nodes_mapped[next_node] != 1):#node not already claimed
+      if(node_memory[next_node] <= robot_memory - calculate_memory(nodes_visited)):
+        if(nodes_mapped[next_node] < 0.5):#node not already claimed
           nodes_visited.append(next_node)
-          memory_left -= node_memory[next_node]
           for i in range(1,nodes):
             if nodes_mapped[i] != 1 and (adj_grid[next_node][i] == 1) and (next_node != i) and i not in possible_next_nodes and i not in nodes_visited:
               possible_next_nodes.append(i)
         else:#try a trade if node is claimed
+          pass
           runIndex = -1
           for i in range(0,robot): # finds the run where next_node is from
             if next_node in runs[i]:
@@ -112,10 +110,10 @@ for k in range(30):
             for n in known_nodes:
               for i in range(1,nodes):
                 if((adj_grid[n][i] == 1)and (n != i) and nodes_mapped[i] != 1 and i not in nodes_visited and \
-                  calculate_memory(trial_run) + node_memory[i] <= robot_memory and node_memory[i] > new_mem):
+                  calculate_memory(trial_run) + node_memory[i] <= robot_memory and node_memory[i] > new_mem and i not in new_nodes ):
                   new_selection = i
                   new_mem = node_memory[i]
-            if new_selection > 0:
+            if new_selection >= 0:
               trial_run.append(new_selection) #build out the alternitive
               known_nodes.append(new_selection)
               new_nodes.append(new_selection)
@@ -124,32 +122,27 @@ for k in range(30):
                   possible_next_nodes.append(i)
             else:
               done = True
-          if(calculate_memory(trial_run) > calculate_memory(runs[runIndex]) and isTravelable(known_nodes)):
+          can_be_traveled = True
+          known_nodes = []
+          for i in range(0,robot):
+            known_nodes.extend(runs[i])# all known nodes except the trade
+            can_be_traveled = can_be_traveled and isTravelable(known_nodes)
+          if(calculate_memory(trial_run) > calculate_memory(runs[runIndex]) and can_be_traveled):
             runs[runIndex] = trial_run
             nodes_visited.append(next_node)
-            memory_left -= node_memory[next_node]
             for n in new_nodes:
               nodes_mapped[n] = 1
               for i in range(1,nodes):
                 if nodes_mapped[i] != 1 and (adj_grid[n][i] == 1) and (n != i) and i not in possible_next_nodes and i not in nodes_visited:
-                  possible_next_nodes.append(i)        
+                  possible_next_nodes.append(i)   
       possible_next_nodes.remove(next_node)
-        
-        
-    
-    print("robot-" + str(robot)+ " " + str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
-    #print(nodes_mapped)
-    # print("Not enough memory left, done with path at node " + str(current_node))
-    # print("Available memory left: " + str(memory_left))
-    # print(adj_grid[current_node])
-    print("Path: " + str(nodes_visited))
     runs.append(nodes_visited)
     # mark which nodes are mapped after returning to base
     robot += 1
-    mem_used.append(robot_memory - memory_left)
     for i in nodes_visited:
       nodes_mapped[i] = 1
-  rounds.append((numpy.full(len(mem_used), 10) - mem_used).tolist())
+  for r in runs:
+    rounds.append(robot_memory-calculate_memory(r))
 
 for i in range(len(rounds)):
   print(rounds[i])
