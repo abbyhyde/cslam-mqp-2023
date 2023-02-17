@@ -1,0 +1,23 @@
+<launch>
+    <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="name"  default=""/>
+    <arg name="x_pos" default=" 0.0"/>
+    <arg name="y_pos" default=" 0.0"/>
+    <arg name="z_pos" default=" 0.0"/>
+    <arg name="yaw"   default=" 0.0"/>
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find cslam_mqp)/new.urdf.xacro" />
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+      <param name="publish_frequency" type="double" value="50.0" />
+      <param name="tf_prefix" value="$(arg name)" />
+    </node>
+
+    <include file="$(find rbe3002_lab4)/launch/lab4_robot_part1.launch">
+      <arg name="ns" value="$(arg name)"/>
+    </include>
+
+    <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+      args="-urdf -model $(arg name) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) 
+      -param robot_description -model $(arg name) -robot_namespace $(arg name) " />
+</launch>

@@ -1,0 +1,53 @@
+<launch>
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="first_tb3"  default="WARIO"/>
+  <arg name="second_tb3" default="MARIO"/>
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+
+
+  <arg name="first_tb3_x_pos" default="0.5"/>
+  <arg name="first_tb3_y_pos" default=" 0.5"/>
+  <arg name="first_tb3_z_pos" default=" 0.0"/>
+  <arg name="first_tb3_yaw"   default=" 1.57"/>
+
+  <arg name="second_tb3_x_pos" default=" -0.5"/>
+  <arg name="second_tb3_y_pos" default="-0.5"/>
+  <arg name="second_tb3_z_pos" default=" 0.0"/>
+  <arg name="second_tb3_yaw"   default=" 1.57"/>
+
+  <node pkg="rviz" type="rviz" name="rviz_wario" required="true" args="-d $(find cslam_mqp)/rviz/multi_wario.rviz"/>
+
+  <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>  
+
+  <group ns = "$(arg first_tb3)">
+    <param name="tf_prefix" value="$(arg first_tb3)"/>
+    <include file="$(find cslam_mqp)/launch/one_robot.launch">
+        <arg name="name" value="$(arg first_tb3)"/>
+        <arg name="x_pos" default="$(arg first_tb3_x_pos)"/>
+        <arg name="y_pos" default="$(arg first_tb3_y_pos)"/>
+        <arg name="z_pos" default="$(arg first_tb3_z_pos)"/>
+        <arg name="yaw"   default="$(arg first_tb3_yaw)"/>
+    </include>
+  </group>
+
+  <group ns = "$(arg second_tb3)">
+    <param name="tf_prefix" value="$(arg second_tb3)"/>
+    <include file="$(find cslam_mqp)/launch/one_robot.launch">
+        <arg name="name" value="$(arg second_tb3)"/>
+        <arg name="x_pos" default="$(arg second_tb3_x_pos)"/>
+        <arg name="y_pos" default="$(arg second_tb3_y_pos)"/>
+        <arg name="z_pos" default="$(arg second_tb3_z_pos)"/>
+        <arg name="yaw"   default="$(arg second_tb3_yaw)"/>
+    </include>
+  </group>
+
+</launch>
