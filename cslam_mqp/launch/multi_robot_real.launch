@@ -6,35 +6,24 @@
 
   <node pkg="rviz" type="rviz" name="rviz_wario" required="true" args="-d $(find cslam_mqp)/rviz/multi_wario.rviz"/>
 
-  <!-- <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/> -->
+  <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/>
 
   <group ns = "$(arg first_tb3)">
     <param name="tf_prefix" value="$(arg first_tb3)"/>
     <include file="$(find cslam_mqp)/launch/one_robot.launch">
         <arg name="name" value="$(arg first_tb3)"/>
-        <arg name="x_pos" default="$(arg first_tb3_x_pos)"/>
-        <arg name="y_pos" default="$(arg first_tb3_y_pos)"/>
-        <arg name="z_pos" default="$(arg first_tb3_z_pos)"/>
-        <arg name="yaw"   default="$(arg first_tb3_yaw)"/>
-    </include>
-     <!-- TurtleBot3 -->
-    <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
-        <arg name="model" value="$(arg model)" />
-        <arg name="multi_robot_name" value="$(arg ns)"/>
+        <arg name="sim" value="false"/>
     </include>
   </group>
 
   
 
-  <!-- <group ns = "$(arg second_tb3)">
+  <group ns = "$(arg second_tb3)">
     <param name="tf_prefix" value="$(arg second_tb3)"/>
     <include file="$(find cslam_mqp)/launch/one_robot.launch">
         <arg name="name" value="$(arg second_tb3)"/>
-        <arg name="x_pos" default="$(arg second_tb3_x_pos)"/>
-        <arg name="y_pos" default="$(arg second_tb3_y_pos)"/>
-        <arg name="z_pos" default="$(arg second_tb3_z_pos)"/>
-        <arg name="yaw"   default="$(arg second_tb3_yaw)"/>
+        <arg name="sim" value="false"/>
     </include>
-  </group> -->
+  </group>
 
 </launch>
