@@ -5,5 +5,5 @@ the random generation for every algorithm. The random numbers generated will be 
 
 seed = 102
 num_nodes = 20
-memory = 10
+memory = 10.1 #prevents rounding errors from being bad 
 robots = 5
