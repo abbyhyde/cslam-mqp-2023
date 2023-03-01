@@ -32,8 +32,8 @@ speed_rounds = [[]]
 x_axis = []
 
 # sum of node memory is a certain ratio of the amount of memory of all the robots, 50-200%
-graph_type = 2 # 0 for lattice, 1 for fully connected, 2 for tree
-num_trials = 30
+graph_type = 0 # 0 for lattice, 1 for fully connected, 2 for tree
+num_trials = 5
 
 # runs robot handler and collects data along the way
 def run_robots(a):

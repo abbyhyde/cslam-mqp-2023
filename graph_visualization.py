@@ -1,4 +1,5 @@
 import random, math, params, robot_handler, enum
+import problem6_variedgraphcollection as varied_graphs
 import igraph as ig
 import matplotlib.pyplot as plt
 
@@ -7,7 +8,8 @@ import matplotlib.pyplot as plt
 # Construct the graph from the adj matrix
 n_vertices = params.num_nodes
 edges = []
-robot_handler.generate()
+# robot_handler.generate()
+robot_handler.generate_graph(0,0.5)
 # print(robot_handler.adj_grid)
 for i in range(n_vertices):
     for j in range(n_vertices):

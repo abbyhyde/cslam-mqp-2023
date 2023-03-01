@@ -301,7 +301,7 @@ def run_all_robots(algorithm):
     round = 0
     memory_usage = []
     while(not done()):
-        if (round > 1500):
+        if (round > 3000):
             print("we done fucked up spock")
             break
         # print("round: "+ str(round))
@@ -328,11 +328,11 @@ def run_all_robots(algorithm):
                     for j in range(len(nodes)):
                         if (adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED):
                             nodes[j] = Robot_State.NOT_CLAIMED # adding the new nodes at the frontier to not being claimed
-    # print("round: "+ str(round))
+    print("round: "+ str(round))
     round += 1
-    # print("nodes: " + str (nodes))
+    print("nodes: " + str (nodes))
     robot_string = ""
     for robot in robots:
         robot_string = robot_string + "\n" + str(robot)
-    # print("robots: " + robot_string)
+    print("robots: " + robot_string)
     return round, memory_usage
