@@ -12,7 +12,6 @@ num_nodes = params.num_nodes
 robot_memory = params.memory
 num_robots = params.robots
 random.seed(params.seed)
-numpy.random.seed(params.seed)
 
 class Robot_State(Enum):
     NOT_ENCOUNTERED = 0
@@ -32,9 +31,9 @@ robots = [] # holds all robot objects
 def generate_graph(gt, pct):
     global adj_grid, node_memory
     sum_node_memory = robot_memory * num_robots * pct # calculate the total amount of memory on the graph
-    print("Total sum of nodes: " + str(sum_node_memory))
+    # print("Total sum of nodes: " + str(sum_node_memory))
     if (gt == 0):
-        print("Building lattice graph...")
+        # print("Building lattice graph...")
         # currently hardcoded for 20 nodes but will be changed at some point
         adj_grid = [[1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         [1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -57,7 +56,7 @@ def generate_graph(gt, pct):
         [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,1],
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1]]
     elif (gt == 1):
-        print("Building fully connected graph...")
+        # print("Building fully connected graph...")
         adj_grid = [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -79,7 +78,7 @@ def generate_graph(gt, pct):
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]
     elif (gt == 2):
-        print("Building tree graph... ")
+        # print("Building tree graph... ")
         # currently hardcoded for 20 nodes but will be changed at some point
         adj_grid = [[1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0],
         [1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0],
@@ -102,7 +101,21 @@ def generate_graph(gt, pct):
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0],
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1]]
     # now assign node memory
-    node_memory = (numpy.random.multinomial(sum_node_memory-num_nodes, numpy.ones(num_nodes)/num_nodes, size=1) + numpy.ones(num_nodes))[0]
+    valid = False
+    rounds = 0
+    while (not valid):
+        params.seed += 1
+        numpy.random.seed(params.seed)  
+        node_memory = (numpy.random.multinomial(sum_node_memory-num_nodes, numpy.ones(num_nodes)/num_nodes, size=1) + numpy.ones(num_nodes))[0] 
+        # print(node_memory)
+        valid = True
+        rounds += 1
+        for i in node_memory:
+            if (i > 10.5):
+                valid = False
+        if (rounds > 10):
+            valid = True
+            print("we gave up and things suck")
     # print(node_memory)
 
 def generate():
@@ -328,11 +341,11 @@ def run_all_robots(algorithm):
                     for j in range(len(nodes)):
                         if (adj_grid[j][node] == 1 and nodes[j] == Robot_State.NOT_ENCOUNTERED):
                             nodes[j] = Robot_State.NOT_CLAIMED # adding the new nodes at the frontier to not being claimed
-    print("round: "+ str(round))
+    # print("round: "+ str(round))
     round += 1
-    print("nodes: " + str (nodes))
+    # print("nodes: " + str (nodes))
     robot_string = ""
     for robot in robots:
         robot_string = robot_string + "\n" + str(robot)
-    print("robots: " + robot_string)
+    # print("robots: " + robot_string)
     return round, memory_usage
