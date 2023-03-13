@@ -1,57 +1,50 @@
 import params, robot_handler
-import statistics
+import statistics, copy, numpy
 nodes = robot_handler.nodes
 robot_memory = params.memory
 robots = params.robots
 
-def generate_new_path(robot_nodes, adj_grid, node_memory):
-    # this section copied from problem 1 greedy
-    at_end = False
-    nodes_visited = [0]
-    highest_cost = 0
-    mem_used = []
-    memory_left = params.memory
-    while (not at_end):
-        possible_next_nodes = []
-        # can only consider a node if there's an edge and hasn't been visited yet and has a smaller memory cost
-        for j in nodes_visited:
-            for i in range(0,robot_nodes):
-                if((adj_grid[j][i] == 1) and (i not in nodes_visited) and (j != i) and node_memory[i] <= memory_left):
-                    # add number to array
-                    possible_next_nodes.append(i)
-        
-        # if robot has enough memory to go to the selected node and robot has not visited it already
-        if (len(possible_next_nodes) > 0):
-            for i in possible_next_nodes:
-                if(highest_cost < node_memory[i]):
-                    highest_cost = node_memory[i]
-                    next_node = i
-            nodes_visited.append(next_node)
-            memory_left -= node_memory[next_node]
-            highest_cost = 0
-        else:
-            at_end = True
-            #print(str(robot_memory - memory_left)+ " " + str((time.monotonic_ns()-start)/1000000))
-            # print("Not enough memory left, done with path at node " + str(current_node))
-            # print("Available memory left: " + str(memory_left))
-            # print(adj_grid[current_node])
-            mem_used.append(robot_memory - memory_left)
-    return nodes_visited, memory_left
+def calculate_mem_used(nodes_visited, node_memory):
+    memory_used = 0
+    for node_index in nodes_visited: # calcuates used memory
+        if(nodes[node_index] != robot_handler.Robot_State.MAPPED): # change this if you want to count previously mapped nodes
+            memory_used += node_memory[node_index]
+    return memory_used
+
+def pick_new_nodes(curr_nodes, ordered_indexes, node_indexes, node_memory):
+    for index in ordered_indexes:
+        if(nodes[node_indexes[index]] == robot_handler.Robot_State.NOT_CLAIMED 
+           and calculate_mem_used(curr_nodes) + node_memory[node_indexes[index]] <= params.memory): #greedy add unclaimed nodes
+            curr_nodes.append(node_indexes[index])
+    return curr_nodes
+
+def calculate_time_to_map(curr_nodes, node_memory):
+    time_to_map = calculate_mem_used(curr_nodes, node_memory)
+    start_node = 0
+    if(len(curr_nodes) != 0):
+        for node in curr_nodes:
+            time_to_map += len(robot_handler.Robot.bfs(start_node, node))
+            start_node = node
+        time_to_map += len(robot_handler.Robot.bfs(curr_nodes[-1], 0))
+    return time_to_map
+    
+    
 
 def barter_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     # greedly choose a node 
-    greatest_node_memory = -1
-    greatest_node_index = -1
-    memory_to_map = 0
-    for node_index in nodes_to_visit:
-        if(nodes[node_index] != robot_handler.Robot_State.MAPPED): # change this if you want to count previously mapped nodes
-            memory_to_map += node_memory[node_index]
+    available_node_memory_list = []
+    available_node_index_list = []
+    memory_to_map = calculate_mem_used(nodes_to_visit, node_memory)
+    
     for node_index in range(len(node_memory)):
-        if(nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED and memory_to_map + node_memory[node_index] <= max_memory
-            and greatest_node_memory < node_memory[node_index]):
-            greatest_node_memory = node_memory[node_index]
-            greatest_node_index = node_index
-    if(greatest_node_index >= 0):
+        if((nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED or nodes[node_index] == robot_handler.Robot_State.CLAIMED) 
+           and memory_to_map + node_memory[node_index] <= max_memory and node_index not in nodes_to_visit):
+            available_node_memory_list.append(node_memory[node_index])
+            available_node_index_list.append(node_index)
+    greatest_node_memory_index = numpy.argsort(available_node_memory_list).tolist()
+    while(len(greatest_node_memory_index) > 0):
+        greatest_node_index = available_node_index_list[greatest_node_memory_index.pop(-1)]
+        
         # then we have a good node!
         # 2 possibilities node is clamed by robot a or not
         # loop through each robot to determine if the current node is in one of the robot's fields
@@ -66,38 +59,41 @@ def barter_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
                     old_robot = i
                     break
         
-        # if not, add node to nodes_to_visit
-        if (not found):
-            nodes_to_visit.append(greatest_node_index)
-        else: 
-            b_prime_nodes = nodes_to_visit
-            b_prime_nodes.append(greatest_node_index)
-            a_prime_nodes = cur_robot_nodes
-            a_prime_nodes.remove(greatest_node_index)
-            # generate new paths for the robots based on new node lists
-            # get memory left and new paths
-            a_prime_mem, a_prime = generate_new_path(a_prime_nodes, adj_grid, node_memory)
-            b_prime_mem, b_prime = generate_new_path(b_prime_nodes, adj_grid, node_memory)
+        # if found try a trade
+        if (found): 
+            if (len(robot_list[old_robot].nodes_to_visit) > 1 and robot_list[old_robot].inAuction):
+                b_prime_nodes = copy.deepcopy(nodes_to_visit)
+                b_prime_nodes.append(greatest_node_index)
+                a_prime_nodes = copy.deepcopy(robot_list[old_robot].nodes_to_visit)
+                a_prime_nodes.remove(greatest_node_index)
+                # generate new paths for the robots based on new node lists
+                # get memory left and new paths
+                a_prime_nodes = pick_new_nodes(a_prime_nodes, greatest_node_memory_index, available_node_index_list, node_memory)
+                a_prime_mem = calculate_mem_used(a_prime_nodes, node_memory)
+                b_prime_mem = calculate_mem_used(b_prime_nodes, node_memory)
 
-            # compare if a' and currpath+ new node is better that a and currpath
-                # calculate length of each new path
-                # calculate variance in length of paths?
-            alpha = 0.5
-            beta = 0.5
-            delta = 0.5
-            new_score = (alpha*(len(a_prime)+len(b_prime))) + (beta*new_variance) + (delta*new_memory)
-            old_score = (alpha*(len(cur_robot_nodes)+len(nodes_to_visit))) + (beta*old_variance) + (delta*old_memory)
-            # go through with trade if a'.length <= a.length,  
-            # decreases or equals variance in length in paths, 
-            # a.memoryleft >= a'.memoryleft #possible margin
-            # use meta heuristics to weight each decision -> make constants for each qualifier and sum together to get score
-            if (new_score > old_score):
-                # add node to nodes_to_visit on new robot
-                nodes_to_visit.append(greatest_node_index)
-                # remove node from old robot
-                old_robot_obj = robot_handler.robots[old_robot]
-                old_robot_obj.nodes_to_visit.remove(greatest_node_index)
-    return nodes_to_visit
+                # compare if a' and currpath+ new node is better that a and currpath
+                    # calculate length of each new path
+                    # calculate variance in length of paths
+                alpha = 0.5
+                delta = 0.5
+                new_score = (alpha*(calculate_time_to_map(a_prime_nodes, node_memory))) + (delta/a_prime_mem)
+                old_score = (alpha*(calculate_time_to_map(robot_list[old_robot].nodes_to_visit, node_memory))) + (delta/calculate_mem_used(robot_list[old_robot].nodes_to_visit, node_memory))
+                # go through with trade if a'.length <= a.length,  
+                # decreases or equals variance in length in paths, 
+                # a.memoryleft >= a'.memoryleft #possible margin
+                # use meta heuristics to weight each decision -> make constants for each qualifier and sum together to get score
+                if (new_score < old_score):
+                    # remove node from old robot
+                    old_robot_obj = robot_handler.robots[old_robot]
+                    old_robot_obj.nodes_to_visit.remove(greatest_node_index)
+                    old_robot_obj.nodes_to_visit = a_prime_nodes
+                else:
+                    continue
+            else:
+                continue
+        return greatest_node_index, False, 0
+    return None, True, memory_to_map
     
 # robot that was stolen from doesn't take new nodes for now
 

@@ -193,6 +193,7 @@ class Robot:
         self.curr_node = -1 # -1 means outside the graph, robots always enter into node 0
         self.path = []
         self.path.append(0)
+        self.inAuction = False
     
     def __str__(self):
         return "id: " + str(self.id) + " memory usage: " + str(self.memory_usage) + " nodes to visit: " + str(self.nodes_to_visit)
@@ -235,6 +236,7 @@ class Robot:
         # print("picked node " + str(new_node_to_visit))
         if not result:
             self.nodes_to_visit.append(new_node_to_visit)
+            #order nodes better?
         
         return result, new_node_to_visit, memory_usage
 
@@ -325,6 +327,8 @@ def run_all_robots(algorithm):
             robot_string = robot_string + "\n" + str(robot)
         # print("robots: " + robot_string)
         new_usage = holdAuction(robots_in_auction)
+        for robot in robots:
+            robot.inAuction = False
         for value in new_usage:
             memory_usage.append(value)
         robots_in_auction = []
@@ -333,6 +337,7 @@ def run_all_robots(algorithm):
             # if robot is done, parse all nodes from the robot and label accordingly
             if(back):
                 robots_in_auction.append(i)
+                robots[i].inAuction = True
                 for node in robots[i].nodes_to_visit:
                     nodes[node] = Robot_State.NOT_CLAIMED
                     robots[i].nodes_to_visit.remove(node)
