@@ -232,7 +232,7 @@ class Robot:
             return False
 
     def pick(self):
-        new_node_to_visit, result, memory_usage = self.algorithm(adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
+        new_node_to_visit, result, memory_usage = self.algorithm(self.id, adj_grid, node_memory, self.nodes_to_visit, self.max_memory, nodes)
         # print("picked node " + str(new_node_to_visit))
         if not result:
             self.nodes_to_visit.append(new_node_to_visit)

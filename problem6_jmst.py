@@ -3,7 +3,7 @@ nodes = robot_handler.nodes
 robot_memory = params.memory
 robots = params.robots
 
-def jmst_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
+def jmst_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
   lowest_node_index = -1
   lowest_cost = max_memory
   memory_to_map = 0

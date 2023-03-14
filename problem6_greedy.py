@@ -3,7 +3,7 @@ nodes = robot_handler.nodes
 robot_memory = params.memory
 robots = params.robots
 
-def greedy_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
+def greedy_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     greatest_node_memory = -1
     greatest_node_index = -1
     memory_to_map = 0

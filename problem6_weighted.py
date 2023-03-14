@@ -9,7 +9,7 @@ def calculateNodeWeight(node_weights, index):
     total += node_weight
   return node_weights[index]/total
 
-def weighted_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
+def weighted_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     # print("start")
     next_node_index = -1
     memory_to_map = 0

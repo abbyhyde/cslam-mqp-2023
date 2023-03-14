@@ -27,10 +27,8 @@ def calculate_time_to_map(curr_nodes, node_memory):
             start_node = node
         time_to_map += len(robot_handler.Robot.bfs(curr_nodes[-1], 0))
     return time_to_map
-    
-    
 
-def barter_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
+def barter_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     # greedly choose a node 
     available_node_memory_list = []
     available_node_index_list = []
@@ -77,17 +75,36 @@ def barter_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
                     # calculate variance in length of paths
                 alpha = 0.5
                 delta = 0.5
-                new_score = (alpha*(calculate_time_to_map(a_prime_nodes, node_memory))) + (delta/a_prime_mem)
-                old_score = (alpha*(calculate_time_to_map(robot_list[old_robot].nodes_to_visit, node_memory))) + (delta/calculate_mem_used(robot_list[old_robot].nodes_to_visit, node_memory))
+                new_time = calculate_time_to_map(a_prime_nodes, node_memory)
+                old_time = calculate_time_to_map(robot_list[old_robot].nodes_to_visit, node_memory)
+                b_time = calculate_time_to_map(b_prime_nodes, node_memory)
+                # print(str(a_prime_mem) + " " + str(b_prime_mem) + " " + str(new_time) + " " + str(old_time))
+                # print(str(delta/a_prime_mem) + " " + str(delta/calculate_mem_used(robot_list[old_robot].nodes_to_visit, node_memory)))
+                b_prime_score = (alpha*(b_time) + (delta/b_prime_mem))
+                new_score = (alpha*(new_time)) + (delta/a_prime_mem)
+                old_score = (alpha*(old_time)) + (delta/calculate_mem_used(robot_list[old_robot].nodes_to_visit, node_memory))
                 # go through with trade if a'.length <= a.length,  
                 # decreases or equals variance in length in paths, 
                 # a.memoryleft >= a'.memoryleft #possible margin
                 # use meta heuristics to weight each decision -> make constants for each qualifier and sum together to get score
-                if (new_score < old_score):
+                # print(str(id) + " " + str(old_robot))
+                # print(str(b_prime_score) + " " + str(new_score) + " " + str(old_score))
+                if (abs(b_prime_score - old_score) < 0.5):
+                    # doesn't matter where node is, so assign to robot with lower number
+                    if (old_robot < id):
+                        # print("not switching node, keeping it with current " + str(greatest_node_index))
+                        continue
+                    else:
+                        old_robot_obj = robot_handler.robots[old_robot]
+                        old_robot_obj.nodes_to_visit.remove(greatest_node_index)
+                        old_robot_obj.nodes_to_visit = a_prime_nodes
+                        # print("switching node on a tie " + str(greatest_node_index))
+                elif (new_score < old_score and old_score < b_prime_score):
                     # remove node from old robot
                     old_robot_obj = robot_handler.robots[old_robot]
                     old_robot_obj.nodes_to_visit.remove(greatest_node_index)
                     old_robot_obj.nodes_to_visit = a_prime_nodes
+                    # print("switching node " + str(greatest_node_index))
                 else:
                     continue
             else:
@@ -99,7 +116,7 @@ def barter_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
 
 def main():
     robot_handler.generate()
-    robot_handler.run_all_robots(barter_alg) # has to be changed but idk to what
+    robot_handler.run_all_robots(barter_alg)
 
 if __name__ == "__main__":
     main()

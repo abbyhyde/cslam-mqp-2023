@@ -8,7 +8,7 @@ Graph shape not yet tested cause ubuntu is stupid with igraph apparently
 # test running robots / collecting data
 import numpy
 import robot_handler
-import problem6_greedy, problem6_jmst, problem6_uniform, problem6_weighted, problem6_speed
+import problem6_greedy, problem6_jmst, problem6_uniform, problem6_weighted, problem6_speed, problem6_barter
 import matplotlib.pyplot as plt
 import params
 import random, math
@@ -18,6 +18,7 @@ jmst_trials = []
 uniform_trials = []
 weighted_trials = []
 speed_trials = []
+barter_trials = []
 
 # stores the data for each run? idk
 greedy_rounds = [[]]
@@ -29,6 +30,7 @@ uniform_usage = [[]]
 weighted_rounds = [[]]
 weighted_usage = [[]]
 speed_rounds = [[]]
+barter_rounds = [[]]
 x_axis = []
 
 # sum of node memory is a certain ratio of the amount of memory of all the robots, 50-200%
@@ -47,13 +49,15 @@ def run_robots(a, b):
         weighted_rounds.append([])
         weighted_usage.append([])
         speed_rounds.append([])
+        barter_rounds.append([])
 
     # for i in range(num_trials):
         # running robots returns num rounds and memory usage
     # print("trial #" + str(b))
-    greedy_trials.append(robot_handler.run_all_robots(problem6_greedy.greedy_alg,b))
-    jmst_trials.append(robot_handler.run_all_robots(problem6_jmst.jmst_alg,b))
-    speed_trials.append(robot_handler.run_all_robots(problem6_speed.speedy_alg,b))
+    greedy_trials.append(robot_handler.run_all_robots(problem6_greedy.greedy_alg))
+    jmst_trials.append(robot_handler.run_all_robots(problem6_jmst.jmst_alg))
+    speed_trials.append(robot_handler.run_all_robots(problem6_speed.speedy_alg))
+    barter_trials.append(robot_handler.run_all_robots(problem6_barter.barter_alg))
 
     uniform_current = []
     weighted_current = []
@@ -64,8 +68,8 @@ def run_robots(a, b):
     uniform_new = [] 
     weighted_new = []
     for i in range(num_trials):
-        uniform_current.append(robot_handler.run_all_robots(problem6_uniform.uniform_alg,b))
-        weighted_current.append(robot_handler.run_all_robots(problem6_weighted.weighted_alg,b))
+        uniform_current.append(robot_handler.run_all_robots(problem6_uniform.uniform_alg))
+        weighted_current.append(robot_handler.run_all_robots(problem6_weighted.weighted_alg))
     for j in range(num_trials):
         # print(len(uniform_current[j][1]))
         uniform_sum += uniform_current[j][0]
@@ -92,6 +96,7 @@ def analyze_data():
     rounds.scatter(numpy.array(x_axis)+0.15, uniform_rounds, label='uniform random')
     rounds.scatter(numpy.array(x_axis)-0.05, weighted_rounds, label='weighted random')
     rounds.scatter(numpy.array(x_axis)-0.15, jmst_rounds, label='j-mst')
+    rounds.scatter(numpy.array(x_axis)-0.10, barter_rounds, label='barter')
     rounds.scatter(numpy.array(x_axis), speed_rounds, label='speed')
     rounds.set_xlabel('node memory (pct of robot)')
     rounds.set_ylabel('rounds to completion')
@@ -121,6 +126,8 @@ def main():
             # uniform_usage[a].extend(uniform_trials[(a*num_trials)+i][1])
             weighted_rounds[a].append(weighted_trials[(a*num_trials)+i][0])
             # weighted_usage[a].extend(weighted_trials[(a*num_trials)+i][1])
+            new_num = sum(barter_trials[(a*num_trials)+i][1])
+            barter_rounds[a].append(new_num)
             x_axis.append(numpy.array(params.node_mem_pct))
         print("done with runs")
         params.seed = 204

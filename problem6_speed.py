@@ -3,7 +3,7 @@ nodes = robot_handler.nodes
 robot_memory = params.memory
 robots = params.robots
 
-def speedy_alg(adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
+def speedy_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     least_node_distance = None
     least_node_index = -1
     memory_to_map = 0
