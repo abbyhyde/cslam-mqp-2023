@@ -73,8 +73,8 @@ def barter_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
                 # compare if a' and currpath+ new node is better that a and currpath
                     # calculate length of each new path
                     # calculate variance in length of paths
-                alpha = 0.5
-                delta = 0.5
+                alpha = 0.25
+                delta = 0.75
                 new_time = calculate_time_to_map(a_prime_nodes, node_memory)
                 old_time = calculate_time_to_map(robot_list[old_robot].nodes_to_visit, node_memory)
                 b_time = calculate_time_to_map(b_prime_nodes, node_memory)
