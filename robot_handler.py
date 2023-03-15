@@ -278,7 +278,12 @@ def holdAuction(robots_in_auction):
     robots_full = 0 
     memory_usage = []
     # assign nodes as long as there are nodes left to assign and there are robots that don't have full memory
-    while(robots_full != math.pow(2,len(robots_in_auction))-1):
+    unclaimed_nodes = False
+    for node in nodes:
+        if node == Robot_State.NOT_CLAIMED:
+            unclaimed_nodes = True
+
+    while(robots_full != math.pow(2,len(robots_in_auction))-1 and unclaimed_nodes):
         full, node_claimed, new_memory_usage = robots[robots_in_auction[auction_index]].pick()
         if full:
             if(new_memory_usage != 0):

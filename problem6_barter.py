@@ -33,15 +33,14 @@ def barter_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
     available_node_memory_list = []
     available_node_index_list = []
     memory_to_map = calculate_mem_used(nodes_to_visit, node_memory)
-    
     for node_index in range(len(node_memory)):
-        if((nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED or nodes[node_index] == robot_handler.Robot_State.CLAIMED) 
-           and memory_to_map + node_memory[node_index] <= max_memory and node_index not in nodes_to_visit):
-            available_node_memory_list.append(node_memory[node_index])
+        if((nodes[node_index] == robot_handler.Robot_State.NOT_CLAIMED)  # or nodes[node_index] == robot_handler.Robot_State.CLAIMED) 
+           and memory_to_map + node_memory[node_index] < max_memory and node_index not in nodes_to_visit):
+            available_node_memory_list.append(-node_memory[node_index])
             available_node_index_list.append(node_index)
-    greatest_node_memory_index = numpy.argsort(available_node_memory_list).tolist()
-    while(len(greatest_node_memory_index) > 0):
-        greatest_node_index = available_node_index_list[greatest_node_memory_index.pop(-1)]
+    greatest_node_memory_indexes = numpy.argsort(available_node_memory_list).tolist()
+    while(len(greatest_node_memory_indexes) > 0):
+        greatest_node_index = available_node_index_list[greatest_node_memory_indexes.pop(0)]
         
         # then we have a good node!
         # 2 possibilities node is clamed by robot a or not
@@ -58,7 +57,7 @@ def barter_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
                     break
         
         # if found try a trade
-        if (found): 
+        if (found):
             if (len(robot_list[old_robot].nodes_to_visit) > 1 and robot_list[old_robot].inAuction):
                 b_prime_nodes = copy.deepcopy(nodes_to_visit)
                 b_prime_nodes.append(greatest_node_index)
@@ -66,15 +65,15 @@ def barter_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
                 a_prime_nodes.remove(greatest_node_index)
                 # generate new paths for the robots based on new node lists
                 # get memory left and new paths
-                a_prime_nodes = pick_new_nodes(a_prime_nodes, greatest_node_memory_index, available_node_index_list, node_memory)
+                a_prime_nodes = pick_new_nodes(a_prime_nodes, greatest_node_index, available_node_index_list, node_memory)
                 a_prime_mem = calculate_mem_used(a_prime_nodes, node_memory)
                 b_prime_mem = calculate_mem_used(b_prime_nodes, node_memory)
 
                 # compare if a' and currpath+ new node is better that a and currpath
                     # calculate length of each new path
                     # calculate variance in length of paths
-                alpha = 0.25
-                delta = 0.75
+                alpha = 1
+                delta = 1
                 new_time = calculate_time_to_map(a_prime_nodes, node_memory)
                 old_time = calculate_time_to_map(robot_list[old_robot].nodes_to_visit, node_memory)
                 b_time = calculate_time_to_map(b_prime_nodes, node_memory)
@@ -89,17 +88,7 @@ def barter_alg(id, adj_grid, node_memory, nodes_to_visit, max_memory, nodes):
                 # use meta heuristics to weight each decision -> make constants for each qualifier and sum together to get score
                 # print(str(id) + " " + str(old_robot))
                 # print(str(b_prime_score) + " " + str(new_score) + " " + str(old_score))
-                if (abs(b_prime_score - old_score) < 0.5):
-                    # doesn't matter where node is, so assign to robot with lower number
-                    if (old_robot < id):
-                        # print("not switching node, keeping it with current " + str(greatest_node_index))
-                        continue
-                    else:
-                        old_robot_obj = robot_handler.robots[old_robot]
-                        old_robot_obj.nodes_to_visit.remove(greatest_node_index)
-                        old_robot_obj.nodes_to_visit = a_prime_nodes
-                        # print("switching node on a tie " + str(greatest_node_index))
-                elif (new_score < old_score and old_score < b_prime_score):
+                if (new_score < old_score and old_robot < id):
                     # remove node from old robot
                     old_robot_obj = robot_handler.robots[old_robot]
                     old_robot_obj.nodes_to_visit.remove(greatest_node_index)

@@ -126,8 +126,7 @@ def main():
             # uniform_usage[a].extend(uniform_trials[(a*num_trials)+i][1])
             weighted_rounds[a].append(weighted_trials[(a*num_trials)+i][0])
             # weighted_usage[a].extend(weighted_trials[(a*num_trials)+i][1])
-            new_num = sum(barter_trials[(a*num_trials)+i][1])
-            barter_rounds[a].append(new_num)
+            barter_rounds[a].append(barter_trials[(a*num_trials)+i][0])
             x_axis.append(numpy.array(params.node_mem_pct))
         print("done with runs")
         params.seed = 204
