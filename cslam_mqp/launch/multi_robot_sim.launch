@@ -5,29 +5,29 @@
   <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
 
 
-  <arg name="first_tb3_x_pos" default="0.5"/>
-  <arg name="first_tb3_y_pos" default=" 0.5"/>
+  <arg name="first_tb3_x_pos" default="-0.5"/>
+  <arg name="first_tb3_y_pos" default=" 1.0"/>
   <arg name="first_tb3_z_pos" default=" 0.0"/>
-  <arg name="first_tb3_yaw"   default=" 1.57"/>
+  <arg name="first_tb3_yaw"   default=" 1.4"/>
 
-  <arg name="second_tb3_x_pos" default=" -0.5"/>
-  <arg name="second_tb3_y_pos" default="-0.5"/>
+  <arg name="second_tb3_x_pos" default=" 0.0"/>
+  <arg name="second_tb3_y_pos" default="0.0"/>
   <arg name="second_tb3_z_pos" default=" 0.0"/>
-  <arg name="second_tb3_yaw"   default=" 1.57"/>
+  <arg name="second_tb3_yaw"   default=" 0"/>
 
   <node pkg="rviz" type="rviz" name="rviz_wario" required="true" args="-d $(find cslam_mqp)/rviz/multi_wario.rviz"/>
 
-  <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/>
+  <!-- <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/> -->
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>
+    <arg name="world_name" value="$(find cslam_mqp)/gazebo/maze1.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
     <arg name="headless" value="false"/>
     <arg name="debug" value="false"/>
-  </include>  
-
+  </include>
+  
   <group ns = "$(arg first_tb3)">
     <param name="tf_prefix" value="$(arg first_tb3)"/>
     <include file="$(find cslam_mqp)/launch/one_robot.launch">
@@ -39,7 +39,7 @@
     </include>
   </group>
 
-  <group ns = "$(arg second_tb3)">
+  <!-- <group ns = "$(arg second_tb3)">
     <param name="tf_prefix" value="$(arg second_tb3)"/>
     <include file="$(find cslam_mqp)/launch/one_robot.launch">
         <arg name="name" value="$(arg second_tb3)"/>
@@ -48,6 +48,18 @@
         <arg name="z_pos" default="$(arg second_tb3_z_pos)"/>
         <arg name="yaw"   default="$(arg second_tb3_yaw)"/>
     </include>
-  </group>
+  </group> -->
+
+  <!-- <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen">
+    <param name="robot_map_topic" value="map"/>
+    <param name="robot_namespace" value="ARIO"/>
+    <param name="merged_map_topic" value="world"/>
+    <param name="world_frame" value="world"/>
+    <param name="known_init_poses" value="false"/>
+    <param name="merging_rate" value="1"/>
+    <param name="discovery_rate" value="0.05"/>
+    <param name="estimation_rate" value="1"/>
+    <param name="estimation_confidence" value="0.5"/>
+  </node> -->
 
 </launch>

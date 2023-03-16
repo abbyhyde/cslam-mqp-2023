@@ -8,7 +8,6 @@ Panels:
         - /Status1
         - /Map1
         - /Path1
-        - /Path1/Status1
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -137,6 +136,65 @@ Visualization Manager:
       Topic: /WARIO/curr_goal
       Unreliable: false
       Value: true
+    - Alpha: 0.699999988079071
+      Class: rviz/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic: world
+      Unreliable: false
+      Use Timestamp: false
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        WARIO/base_footprint:
+          Value: true
+        WARIO/base_link:
+          Value: true
+        WARIO/base_scan:
+          Value: true
+        WARIO/caster_back_link:
+          Value: true
+        WARIO/imu_link:
+          Value: true
+        WARIO/map:
+          Value: true
+        WARIO/odom:
+          Value: true
+        WARIO/wheel_left_link:
+          Value: true
+        WARIO/wheel_right_link:
+          Value: true
+        world:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          WARIO/map:
+            WARIO/odom:
+              WARIO/base_footprint:
+                WARIO/base_link:
+                  WARIO/base_scan:
+                    {}
+                  WARIO/caster_back_link:
+                    {}
+                  WARIO/imu_link:
+                    {}
+                  WARIO/wheel_left_link:
+                    {}
+                  WARIO/wheel_right_link:
+                    {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -165,7 +223,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10
+      Distance: 9.480253219604492
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -181,9 +239,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7853981852531433
+      Pitch: 1.2203980684280396
       Target Frame: <Fixed Frame>
-      Yaw: 0.7853981852531433
+      Yaw: 1.5403978824615479
     Saved: ~
 Window Geometry:
   Displays:
