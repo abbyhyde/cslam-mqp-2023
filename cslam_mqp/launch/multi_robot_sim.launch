@@ -17,7 +17,7 @@
 
   <node pkg="rviz" type="rviz" name="rviz_wario" required="true" args="-d $(find cslam_mqp)/rviz/multi_wario.rviz"/>
 
-  <!-- <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/> -->
+  <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find cslam_mqp)/gazebo/maze1.world"/>
@@ -39,7 +39,7 @@
     </include>
   </group>
 
-  <!-- <group ns = "$(arg second_tb3)">
+  <group ns = "$(arg second_tb3)">
     <param name="tf_prefix" value="$(arg second_tb3)"/>
     <include file="$(find cslam_mqp)/launch/one_robot.launch">
         <arg name="name" value="$(arg second_tb3)"/>
@@ -48,9 +48,9 @@
         <arg name="z_pos" default="$(arg second_tb3_z_pos)"/>
         <arg name="yaw"   default="$(arg second_tb3_yaw)"/>
     </include>
-  </group> -->
+  </group>
 
-  <!-- <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen">
+  <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen">
     <param name="robot_map_topic" value="map"/>
     <param name="robot_namespace" value="ARIO"/>
     <param name="merged_map_topic" value="world"/>
@@ -60,6 +60,6 @@
     <param name="discovery_rate" value="0.05"/>
     <param name="estimation_rate" value="1"/>
     <param name="estimation_confidence" value="0.5"/>
-  </node> -->
+  </node>
 
 </launch>

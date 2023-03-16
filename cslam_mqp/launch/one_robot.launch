@@ -36,7 +36,7 @@
       <param name="laser_model_type"          value="likelihood_field"/>
 
       <param name="use_map_topic"             value="true"/>
-      <!-- <remap /> -->
+      <remap from="map" to="/world"/>
       <param name="global_frame_id"           value="/world" />
 
       <param name="odom_model_type"           value="diff"/>
