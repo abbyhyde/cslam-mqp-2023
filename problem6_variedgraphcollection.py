@@ -34,7 +34,7 @@ barter_rounds = [[]]
 x_axis = []
 
 # sum of node memory is a certain ratio of the amount of memory of all the robots, 50-200%
-graph_type = 1 # 0 for lattice, 1 for fully connected, 2 for tree
+graph_type = 2 # 0 for lattice, 1 for fully connected, 2 for tree
 num_trials = 30
 
 # runs robot handler and collects data along the way
@@ -59,6 +59,8 @@ def run_robots(a, b):
     speed_trials.append(robot_handler.run_all_robots(problem6_speed.speedy_alg))
     barter_trials.append(robot_handler.run_all_robots(problem6_barter.barter_alg))
 
+    # for probabilistic trials, must run 30 trials for every trial run in general
+    # since one general trial = one seed = one specific graph, need to get avg action taken by probabilistic alg
     uniform_current = []
     weighted_current = []
     uniform_sum = 0
@@ -108,6 +110,7 @@ def analyze_data():
 
 def main():
     for a in range(4):
+        # every trial, create a new graph
         for b in range(num_trials):
             print("trial #" + str(b))
             params.node_mem_pct = (a+1)*0.5
