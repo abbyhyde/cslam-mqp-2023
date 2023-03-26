@@ -8,6 +8,10 @@ Panels:
         - /Status1
         - /Map1
         - /Path1
+        - /TF1
+        - /TF1/Frames1
+        - /TF1/Tree1
+        - /TF1/Tree1/world1/WARIO/map1
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -150,43 +154,43 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         MARIO/base_footprint:
           Value: true
         MARIO/base_link:
-          Value: true
+          Value: false
         MARIO/base_scan:
-          Value: true
+          Value: false
         MARIO/caster_back_link:
-          Value: true
+          Value: false
         MARIO/imu_link:
-          Value: true
+          Value: false
         MARIO/map:
-          Value: true
+          Value: false
         MARIO/odom:
-          Value: true
+          Value: false
         MARIO/wheel_left_link:
-          Value: true
+          Value: false
         MARIO/wheel_right_link:
-          Value: true
+          Value: false
         WARIO/base_footprint:
           Value: true
         WARIO/base_link:
-          Value: true
+          Value: false
         WARIO/base_scan:
-          Value: true
+          Value: false
         WARIO/caster_back_link:
-          Value: true
+          Value: false
         WARIO/imu_link:
-          Value: true
+          Value: false
         WARIO/map:
           Value: true
         WARIO/odom:
           Value: true
         WARIO/wheel_left_link:
-          Value: true
+          Value: false
         WARIO/wheel_right_link:
-          Value: true
+          Value: false
         world:
           Value: true
       Marker Alpha: 1
@@ -255,7 +259,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.211331367492676
+      Distance: 5.185543537139893
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -271,9 +275,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.4053983688354492
+      Pitch: 1.1503986120224
       Target Frame: <Fixed Frame>
-      Yaw: 1.790398120880127
+      Yaw: 2.0103981494903564
     Saved: ~
 Window Geometry:
   Displays:
