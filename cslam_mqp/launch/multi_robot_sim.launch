@@ -62,4 +62,8 @@
     <param name="estimation_confidence" value="0.5"/>
   </node>
 
+  <node pkg="cslam_mqp" name="master_control" type="central_control.py" />
+
+  <node name="console" pkg="rqt_console" type="rqt_console" />
+
 </launch>

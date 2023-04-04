@@ -1,0 +1,29 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+  <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
+  <arg name="open_rviz" default="true"/>
+  <arg name="ns" default=""/>
+  <arg name="set_base_frame" default="/$(arg ns)/base_footprint"/>
+  <arg name="set_odom_frame" default="/$(arg ns)/odom"/>
+  <arg name="set_map_frame"  default="/$(arg ns)/map"/>
+
+  <!-- SLAM: Gmapping-->
+  <node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" output="screen">
+    <param name="tf_prefix" value="$(arg ns)" />
+    <param name="base_frame" value="$(arg set_base_frame)"/>
+    <param name="odom_frame" value="$(arg set_odom_frame)"/>
+    <param name="map_frame"  value="$(arg set_map_frame)"/>
+    <rosparam command="load" file="$(find rbe3002_lab4)/src/gmapping_params.yaml" />
+  </node>
+
+  <node name="movement" pkg="rbe3002_lab4" type="lab2.py">
+    <param name="namespace" value="$(arg ns)"/>
+  </node>
+  <node name="path" pkg="rbe3002_lab4" type="path_planner.py" >
+    <param name="namespace" value="$(arg ns)"/>
+  </node>
+  <node name="behavior" pkg="cslam_mqp" type="robot_behavior.py">
+    <param name="namespace" value="$(arg ns)"/>
+  </node>
+</launch>

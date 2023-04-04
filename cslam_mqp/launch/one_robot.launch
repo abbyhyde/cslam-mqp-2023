@@ -9,7 +9,7 @@
 
     
 
-    <include file="$(find rbe3002_lab4)/launch/lab4_robot_part1.launch">
+    <include file="$(find cslam_mqp)/launch/robot_nodes.launch">
       <arg name="ns" value="$(arg name)"/>
     </include>
 
