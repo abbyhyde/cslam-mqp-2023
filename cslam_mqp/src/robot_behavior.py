@@ -94,6 +94,9 @@ class robot:
         """
         Class constructor
         """
+        self.mapping = False
+        self.donecspace = False
+        self.goal_pose = None
         rospy.sleep(10)
         rospy.init_node('robot_behavior', anonymous=True)
         self.sub_goal = rospy.Subscriber('centroid', PoseStamped, self.explore_centroid)
@@ -104,7 +107,6 @@ class robot:
         rospy.wait_for_service('plan_path')
         self.plan_path = rospy.ServiceProxy('plan_path', GetPlan)
         self.pub_goal = rospy.Publisher('curr_goal', Path)
-        self.mapping = False
         map_functions.init_request_map()
         rospy.sleep(25)
         rospy.loginfo("robot_behavior node ready")
@@ -113,6 +115,9 @@ class robot:
         """
         behavior for exploration
         """
+        if not self.donecspace:
+            self.goal_pose = msg.pose
+
         if not self.mapping:
             self.mapping = True
 
@@ -121,45 +126,47 @@ class robot:
             frontier = threshold_frontiers(map_data[0])  # find the frontiers
             blobs = find_blobs(frontier)
             centroids = find_centroids(blobs)
+            self.donecspace = True
             #compare centroid received from
             goal_pose = PoseStamped()
-            goal_pose.pose = msg.pose
+            goal_pose.pose = self.goal_pose
             goal_pose.header.frame_id = "/world"
             goal_pose = self.listener.transformPose(rospy.get_namespace() + "map", goal_pose)
+            self.donecspace = False
             goal_position = map_functions.world_to_grid(frontier, goal_pose.pose.position)
+            if len(centroids) > 0:
+                target = centroids[0] #set to chosen centroid
+                for centroid in centroids:
+                    if(map_functions.euclidean_distance(centroid[0],centroid[1], goal_position[0], goal_position[1]) 
+                    < map_functions.euclidean_distance(target[0],target[1], goal_position[0], goal_position[1])):
+                        target = centroid
 
-            target = centroids[0] #set to chosen centroid
-            for centroid in centroids:
-                if(map_functions.euclidean_distance(centroid[0],centroid[1], goal_position[0], goal_position[1]) 
-                < map_functions.euclidean_distance(target[0],target[1], goal_position[0], goal_position[1])):
-                    target = centroid
-
-            path_response = None
-            empty_path = Path()
-            empty_path.poses = []
-            empty_path.header.frame_id = rospy.get_namespace() + "map"
-            failed_attempts = 0
-            while path_response is None or len(path_response.plan.poses) == 0 and MAX_ATTEMPTS > failed_attempts:
-                goal_pose = PoseStamped()
-                goal_pose.pose.position = map_functions.grid_to_world(frontier, target[0], target[1])
-                goal_pose.header.frame_id = rospy.get_namespace() + "map"
-                last_pose = PoseStamped()
-                last_pose.pose.position = self.pose.position
-                last_pose.header.frame_id = rospy.get_namespace() + "map"
-                rospy.loginfo(last_pose)
+                path_response = None
                 empty_path = Path()
                 empty_path.poses = []
                 empty_path.header.frame_id = rospy.get_namespace() + "map"
-                self.pub_goal.publish(empty_path) # stop momement before planning
-                path_response = self.plan_path(last_pose, goal_pose, 0.1)
-                if len(path_response.plan.poses) != 0:
-                    rospy.loginfo("found good path to frontier")
-                    self.pub_goal.publish(path_response.plan)
+                failed_attempts = 0
+                while path_response is None or len(path_response.plan.poses) == 0 and MAX_ATTEMPTS > failed_attempts:
+                    goal_pose = PoseStamped()
+                    goal_pose.pose.position = map_functions.grid_to_world(frontier, target[0], target[1])
+                    goal_pose.header.frame_id = rospy.get_namespace() + "map"
+                    last_pose = PoseStamped()
+                    last_pose.pose.position = self.pose.position
                     last_pose.header.frame_id = rospy.get_namespace() + "map"
-                    rospy.loginfo("waiting "+ str(2*len(path_response.plan.poses)))
-                    rospy.sleep(2*len(path_response.plan.poses)) #wait for the robot to traverse the path
-                else:
-                    failed_attempts += 1
+                    rospy.loginfo(last_pose)
+                    empty_path = Path()
+                    empty_path.poses = []
+                    empty_path.header.frame_id = rospy.get_namespace() + "map"
+                    self.pub_goal.publish(empty_path) # stop momement before planning
+                    path_response = self.plan_path(last_pose, goal_pose, 0.1)
+                    if len(path_response.plan.poses) != 0:
+                        rospy.loginfo("found good path to frontier")
+                        self.pub_goal.publish(path_response.plan)
+                        last_pose.header.frame_id = rospy.get_namespace() + "map"
+                        rospy.loginfo("waiting "+ str(2*len(path_response.plan.poses)))
+                        rospy.sleep(2*len(path_response.plan.poses)) #wait for the robot to traverse the path
+                    else:
+                        failed_attempts += 1
             self.mapping = False
         
 

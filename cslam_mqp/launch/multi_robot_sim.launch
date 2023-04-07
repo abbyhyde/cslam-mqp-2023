@@ -1,7 +1,7 @@
 <launch>
   <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
   <arg name="first_tb3"  default="WARIO"/>
-  <arg name="second_tb3" default="MARIO"/>
+  <arg name="second_tb3" default="LUIGI"/>
   <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
 
 
@@ -18,6 +18,7 @@
   <node pkg="rviz" type="rviz" name="rviz_wario" required="true" args="-d $(find cslam_mqp)/rviz/multi_wario.rviz"/>
 
   <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/>
+  <node pkg="rviz" type="rviz" name="rviz_world" required="true" args="-d $(find cslam_mqp)/rviz/world.rviz"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find cslam_mqp)/gazebo/maze1.world"/>
@@ -50,13 +51,13 @@
     </include>
   </group>
 
-  <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen">
+  <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen"  launch-prefix="bash -c 'sleep 10; $0 $@' " >
     <param name="robot_map_topic" value="map"/>
-    <param name="robot_namespace" value="ARIO"/>
+    <param name="robot_namespace" value="I"/>
     <param name="merged_map_topic" value="world"/>
     <param name="world_frame" value="world"/>
     <param name="known_init_poses" value="false"/>
-    <param name="merging_rate" value="1"/>
+    <param name="merging_rate" value="2"/>
     <param name="discovery_rate" value="0.05"/>
     <param name="estimation_rate" value="1"/>
     <param name="estimation_confidence" value="0.5"/>

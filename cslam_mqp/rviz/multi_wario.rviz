@@ -140,55 +140,17 @@ Visualization Manager:
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: world
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        MARIO/base_footprint:
-          Value: true
-        MARIO/base_link:
-          Value: true
-        MARIO/base_scan:
-          Value: true
-        MARIO/caster_back_link:
-          Value: true
-        MARIO/imu_link:
-          Value: true
-        MARIO/map:
-          Value: true
-        MARIO/odom:
-          Value: true
-        MARIO/wheel_left_link:
-          Value: true
-        MARIO/wheel_right_link:
-          Value: true
-        WARIO/base_footprint:
-          Value: true
-        WARIO/base_link:
-          Value: false
-        WARIO/base_scan:
-          Value: false
-        WARIO/caster_back_link:
-          Value: false
-        WARIO/imu_link:
-          Value: false
-        WARIO/map:
-          Value: true
-        WARIO/odom:
-          Value: true
-        WARIO/wheel_left_link:
-          Value: false
-        WARIO/wheel_right_link:
-          Value: false
-        world:
-          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -196,37 +158,9 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          MARIO/map:
-            MARIO/odom:
-              MARIO/base_footprint:
-                MARIO/base_link:
-                  MARIO/base_scan:
-                    {}
-                  MARIO/caster_back_link:
-                    {}
-                  MARIO/imu_link:
-                    {}
-                  MARIO/wheel_left_link:
-                    {}
-                  MARIO/wheel_right_link:
-                    {}
-          WARIO/map:
-            WARIO/odom:
-              WARIO/base_footprint:
-                WARIO/base_link:
-                  WARIO/base_scan:
-                    {}
-                  WARIO/caster_back_link:
-                    {}
-                  WARIO/imu_link:
-                    {}
-                  WARIO/wheel_left_link:
-                    {}
-                  WARIO/wheel_right_link:
-                    {}
+        {}
       Update Interval: 0
-      Value: true
+      Value: false
     - Alpha: 1
       Class: rviz/GridCells
       Color: 25; 255; 0
@@ -264,7 +198,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 13.517762184143066
+      Distance: 12.92224407196045
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1

@@ -26,11 +26,12 @@ class swarm_behavior:
         """
         Class constructor
         """
-        rospy.sleep(15)
+        rospy.sleep(20)
         rospy.init_node('swarm_behavior', anonymous=True)
         self.merged_map = None
         self.map_sub = rospy.Subscriber("world",OccupancyGrid, self.update_map)
-        self.robots = [robot("MARIO"), robot("WARIO")]
+        self.listener = tf.TransformListener()
+        self.robots = [robot("LUIGI"), robot("WARIO")]
         self.centroid_pubs = []
         self.odom_subs= []
         for r in self.robots:
@@ -43,12 +44,17 @@ class swarm_behavior:
         self.merged_map = msg
 
     def update_odometry(self, msg):
+        robot_index = 0
+        for i in range(len(self.robots)):
+            if msg._connection_header["topic"].split('/')[1] == self.robots[i].name:
+                robot_index = i
+                break
         new_pose = PoseStamped()
         new_pose.pose = msg.pose.pose
         new_pose.header.frame_id =  msg._connection_header["topic"].split('/')[1] + "/map"
-        self.pose = self.listener.transformPose("world", new_pose).pose
-        if self.initial_pose is None:
-            self.initial_pose = self.pose
+        new_pose = self.listener.transformPose("world", new_pose).pose
+        if self.merged_map is not None and self.robots[robot_index].tf_status:
+            self.robots[robot_index].pose = map_functions.world_to_grid(self.merged_map, new_pose.position)
     
     def get_ready_robots(self):
         #returns the ready robots' indicies
@@ -78,7 +84,7 @@ class swarm_behavior:
             for i in range(len(self.robots)): #test to make sure what robots have a transform with world
                 try:
                     (trans,rot) = listener.lookupTransform('/world', '/' + self.robots[i].name + '/map', rospy.Time(0))
-                except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+                except Exception as e:
                     self.robots[i].tf_status = False
                     continue
                 print(self.robots[i].name + " has a tf")
@@ -96,7 +102,12 @@ class swarm_behavior:
                 
                 last_frontiers = len(centroids)
                 for i in range(len(ready_robots) if len(ready_robots) <= len(centroids) else len(centroids)):
-                    weights = np.array(centroids)[:,2]
+                    centroid_positions = np.array(centroids)[:,0:2]
+                    weights = np.array(centroids)[:,2] 
+                    for j in range(weights.shape[0]):
+                        weights[j] *= 9/(map_functions.euclidean_distance(self.robots[ready_robots[i]].pose[0],self.robots[ready_robots[i]].pose[1], centroid_positions[j][0], centroid_positions[j][1])**2)
+                        if(len(ready_robots) > 1):
+                            weights[j] *= (2*math.atan(map_functions.euclidean_distance(self.robots[not int(ready_robots[i])].pose[0],self.robots[not int(ready_robots[i])].pose[1], centroid_positions[j][0], centroid_positions[j][1])**2)/math.pi)**2
                     chosen_index = np.argsort(weights)[0]
                     centroid_pose = PoseStamped()
                     centroid_pose.header.frame_id = 'world'
@@ -105,7 +116,7 @@ class swarm_behavior:
                     centroids = np.delete(centroids, chosen_index, 0)
 
             
-            rospy.sleep(5) # wait for robots to start/continue mapping
+            rospy.sleep(2) # wait for robots to start/continue mapping
         
         #add going home when done
 

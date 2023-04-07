@@ -1,12 +1,14 @@
 <launch>
   <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
-  <arg name="first_tb3"  default="WARIO"/>
-  <arg name="second_tb3" default="MARIO"/>
+  <arg name="first_tb3"  default="LUIGI"/>
+  <arg name="second_tb3" default="WARIO"/>
   <arg name="configuration_basename" default="turtlebot3_lds_2d.lua"/>
 
   <node pkg="rviz" type="rviz" name="rviz_wario" required="true" args="-d $(find cslam_mqp)/rviz/multi_wario.rviz"/>
 
   <node pkg="rviz" type="rviz" name="rviz_mario" required="true" args="-d $(find cslam_mqp)/rviz/multi_mario.rviz"/>
+
+  <node pkg="rviz" type="rviz" name="rviz_world" required="true" args="-d $(find cslam_mqp)/rviz/world.rviz"/>
 
   <group ns = "$(arg first_tb3)">
     <param name="tf_prefix" value="$(arg first_tb3)"/>
@@ -24,16 +26,20 @@
     </include>
   </group>
 
-  <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen">
+  <node pkg="multirobot_map_merge" type="map_merge" respawn="false" name="map_merge" output="screen" launch-prefix="bash -c 'sleep 40; $0 $@' " >
     <param name="robot_map_topic" value="map"/>
-    <param name="robot_namespace" value="ARIO"/>
-    <param name="merged_map_topic" value="map"/>
-    <param name="world_frame" value="merged_maps"/>
+    <param name="robot_namespace" value="I"/>
+    <param name="merged_map_topic" value="world"/>
+    <param name="world_frame" value="world"/>
     <param name="known_init_poses" value="false"/>
-    <param name="merging_rate" value="1"/>
+    <param name="merging_rate" value="2"/>
     <param name="discovery_rate" value="0.05"/>
     <param name="estimation_rate" value="1"/>
-    <param name="estimation_confidence" value="0.45"/>
+    <param name="estimation_confidence" value="0.5"/>
   </node>
+
+  <node pkg="cslam_mqp" name="master_control" type="central_control.py" />
+
+  <node name="console" pkg="rqt_console" type="rqt_console" />
 
 </launch>
