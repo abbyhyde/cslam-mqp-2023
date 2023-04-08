@@ -209,29 +209,6 @@ def dilate_map(mapdata, padding):
             if not is_cell_walkable(new_map, x, y):  # if we find an obstacle
                 if not is_cell_unknown(new_map, x, y):
                     gridcells_msg.cells.append(grid_to_world(new_map, x, y))
-    # for x in range(mapdata.info.width):
-    #     for y in range(mapdata.info.height):  # iterate through all cells
-    #         if not is_cell_walkable(mapdata, x, y):  # if we find an obstacle
-    #             if not is_cell_unknown(mapdata, x, y):
-    #                 gridcells_msg.cells.append(grid_to_world(mapdata, x, y))
-    #                 new_map.data[grid_to_index(new_map, x, y)] = 100  # mark it unwalkable
-    #                 for dx in range(-1 * padding, padding + 1):
-    #                     for dy in range(-1 * padding, padding + 1):  # iterate through the cells around it
-    #                         if 0 <= x + dx < new_map.info.width and 0 <= y + dy < new_map.info.height:
-    #                             gridcells_msg.cells.append(grid_to_world(mapdata, x + dx, y + dy))
-    #                             new_map.data[grid_to_index(new_map, x + dx, y + dy)] = 100  # mark it unwalkable
-    #             else:
-    #                 if not is_cell_occupied(new_map, x, y):
-    #                     new_map.data[grid_to_index(new_map, x, y)] = -1  # mark it unknown
-    #                     for dx in range(-1 * padding, padding + 1):
-    #                         for dy in range(-1 * padding, padding + 1):  # iterate through the cells around it
-    #                             if not is_cell_occupied(new_map, x + dx,
-    #                                                     y + dy) and 0 <= x + dx < new_map.info.width and \
-    #                                                     0 <= y + dy < new_map.info.height:  # if that cell is currently walkable
-    #                                 new_map.data[grid_to_index(new_map, x + dx, y + dy)] = -1  # mark it unknown
-    #         else:
-    #             if new_map.data[grid_to_index(new_map, x, y)] == -1:
-    #                 new_map.data[grid_to_index(new_map, x, y)] = 0
 
     return new_map, gridcells_msg
 

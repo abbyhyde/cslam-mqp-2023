@@ -104,14 +104,10 @@ class swarm_behavior:
                 for i in range(len(ready_robots) if len(ready_robots) <= len(centroids) else len(centroids)):
                     centroid_positions = np.array(centroids)[:,0:2]
                     weights = np.array(centroids)[:,2] 
-                    for j in range(weights.shape[0]):
-                        weights[j] *= 9/(map_functions.euclidean_distance(self.robots[ready_robots[i]].pose[0],self.robots[ready_robots[i]].pose[1], centroid_positions[j][0], centroid_positions[j][1])**2)
-                        if(len(ready_robots) > 1):
-                            weights[j] *= (2*math.atan(map_functions.euclidean_distance(self.robots[not int(ready_robots[i])].pose[0],self.robots[not int(ready_robots[i])].pose[1], centroid_positions[j][0], centroid_positions[j][1])**2)/math.pi)**2
                     chosen_index = np.argsort(weights)[0]
                     centroid_pose = PoseStamped()
                     centroid_pose.header.frame_id = 'world'
-                    centroid_pose.pose.position = map_functions.grid_to_world(frontier, centroids[chosen_index][0], centroids[chosen_index][1])
+                    centroid_pose.pose.position = map_functions.grid_to_world(self.merged_map, centroids[chosen_index][0], centroids[chosen_index][1])
                     self.centroid_pubs[ready_robots[i]].publish(centroid_pose)
                     centroids = np.delete(centroids, chosen_index, 0)
 

@@ -163,8 +163,6 @@ class robot:
                         rospy.loginfo("found good path to frontier")
                         self.pub_goal.publish(path_response.plan)
                         last_pose.header.frame_id = rospy.get_namespace() + "map"
-                        rospy.loginfo("waiting "+ str(2*len(path_response.plan.poses)))
-                        rospy.sleep(2*len(path_response.plan.poses)) #wait for the robot to traverse the path
                     else:
                         failed_attempts += 1
             self.mapping = False
