@@ -16,5 +16,5 @@ for col in data.columns:
     data_plot.scatter(np.random.normal(val, 0.1, size=len(data_col)).tolist(), data_col, label=col, alpha = 0.5)
     val += 1
 data_plot.set_ylabel('Unused Memory from Run')
-data_plot.set_title('Problem 3 Algorithm Comparison')
+data_plot.set_title('Subproblem 2 Algorithm Comparison')
 plt.show()

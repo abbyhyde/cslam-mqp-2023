@@ -11,5 +11,5 @@ for col in data.columns:
     data_plot.scatter(np.random.normal(val, 0.1, size=len(data_col)).tolist(), data_col, label=col, alpha = 0.5)
     val += 1
 data_plot.set_ylabel('Fraction of Optimal')
-data_plot.set_title('Problem 1 Algorithm Comparison')
+data_plot.set_title('Subproblem 1 Algorithm Comparison')
 plt.show()
