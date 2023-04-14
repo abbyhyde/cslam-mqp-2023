@@ -5,16 +5,19 @@ import numpy as np
 import rospy
 import math
 from geometry_msgs.msg import PoseStamped
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, Path
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Bool
 import tf
+from tf.transformations import quaternion_from_euler
 
 class robot:
     def __init__(self, name):
         self.name = name
         self.tf_status = False #does the transfrom from world to name/map exist
         self.pose  = None #pose in grid coords
+        self.mapping_status = False
+        self.centroids_assigned = []
 
 class swarm_behavior:
     #should getting a centroid be a service robots call?
@@ -34,11 +37,20 @@ class swarm_behavior:
         self.robots = [robot("LUIGI"), robot("WARIO")]
         self.centroid_pubs = []
         self.odom_subs= []
+        self.mapping_subs= []
         for r in self.robots:
-            self.centroid_pubs.append(rospy.Publisher('/' + r.name + '/centroid', PoseStamped))
+            self.centroid_pubs.append(rospy.Publisher('/' + r.name + '/centroid', Path, queue_size=1))
             self.odom_subs.append(rospy.Subscriber('/' + r.name + '/odom', Odometry, self.update_odometry))
+            self.mapping_subs.append(rospy.Subscriber('/' + r.name + '/mapping', Bool, self.update_mapping))
         rospy.loginfo("master_behavior node ready")
         
+    def update_mapping(self, msg):
+        robot_index = 0
+        for i in range(len(self.robots)):
+            if msg._connection_header["topic"].split('/')[1] == self.robots[i].name:
+                robot_index = i
+                break
+        self.robots[robot_index].mapping_status = msg.data
     
     def update_map(self, msg):
         self.merged_map = msg
@@ -61,9 +73,17 @@ class swarm_behavior:
         ready = []
         for i in range(len(self.robots)):
             r = self.robots[i]
-            if r.tf_status and r.pose is not None:
+            if r.tf_status and not r.mapping_status and r.pose is not None:
                 ready.append(i)
+                self.robots[i].centroids_assigned = []
         return ready
+    
+    def already_assigned(self, new_centroid):
+        for r in self.robots:
+            for c in r.centroids_assigned:
+                if map_functions.euclidean_distance(new_centroid.pose.position.x, new_centroid.pose.position.y, c.pose.position.x, c.pose.position.y) < 0.75:
+                    return True
+        return False
 
     def run(self):
         '''TODO
@@ -80,7 +100,7 @@ class swarm_behavior:
         last_frontiers = 1
         listener = tf.TransformListener()
         while last_frontiers > 0:
-            
+            rospy.sleep(10) # make sure the message gets there before we do it again.
             for i in range(len(self.robots)): #test to make sure what robots have a transform with world
                 try:
                     (trans,rot) = listener.lookupTransform('/world', '/' + self.robots[i].name + '/map', rospy.Time(0))
@@ -91,30 +111,41 @@ class swarm_behavior:
                 self.robots[i].tf_status = True
 
             map_data = self.merged_map
-            ready_robots = self.get_ready_robots()
+            ready_robots = self.get_ready_robots() 
+            np.random.shuffle(ready_robots)
             rospy.loginfo(str(len(ready_robots)) + " robots are ready")
             if len(ready_robots) > 0: #dont process the map if there are no robots to receive a new target
-                map_data = map_functions.dilate_map(map_data, math.ceil(0.110/map_data.info.resolution))  # expand the Cspace
+                map_data = map_functions.dilate_map(map_data, math.ceil(0.110/map_data.info.resolution)+1)  # expand the Cspace
                 frontier = robot_behavior.threshold_frontiers(map_data[0])  # find the frontiers
                 blobs = robot_behavior.find_blobs(frontier)
                 centroids = robot_behavior.find_centroids(blobs)
                 rospy.loginfo("we found " + str(len(centroids)) + " centroids")
                 
                 last_frontiers = len(centroids)
-                for i in range(len(ready_robots) if len(ready_robots) <= len(centroids) else len(centroids)):
-                    centroid_positions = np.array(centroids)[:,0:2]
+                i = 0
+                while len(centroids) > 0:
                     weights = np.array(centroids)[:,2] 
-                    chosen_index = np.argsort(weights)[0]
+                    chosen_index = np.argsort(weights)[-1]
                     centroid_pose = PoseStamped()
                     centroid_pose.header.frame_id = 'world'
                     centroid_pose.pose.position = map_functions.grid_to_world(self.merged_map, centroids[chosen_index][0], centroids[chosen_index][1])
-                    self.centroid_pubs[ready_robots[i]].publish(centroid_pose)
+                    if not self.already_assigned(centroid_pose):
+                        self.robots[i].centroids_assigned.append(centroid_pose)
+                        i = (i+1)%len(ready_robots)
                     centroids = np.delete(centroids, chosen_index, 0)
+                for i in ready_robots:
+                    new_frontiers = Path()
+                    new_frontiers.header.frame_id = "world"
+                    for c in self.robots[i].centroids_assigned:
+                        quat = quaternion_from_euler(0, 0, 0)
+                        c.pose.orientation.x = quat[0]
+                        c.pose.orientation.y = quat[1]
+                        c.pose.orientation.z = quat[2]
+                        c.pose.orientation.w = quat[3]
+                        new_frontiers.poses.append(c)
+                    self.centroid_pubs[i].publish(new_frontiers)
 
-            
-            rospy.sleep(2) # wait for robots to start/continue mapping
-        
-        #add going home when done
+                    
 
 
 if __name__ == '__main__':

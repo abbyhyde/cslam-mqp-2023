@@ -8,7 +8,6 @@ Panels:
         - /Status1
         - /TF1/Frames1
         - /TF1/Tree1
-        - /Path2
       Splitter Ratio: 0.5
     Tree Height: 719
   - Class: rviz/Selection
@@ -117,7 +116,7 @@ Visualization Manager:
       Buffer Length: 1
       Class: rviz/Path
       Color: 25; 255; 0
-      Enabled: true
+      Enabled: false
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
       Length: 0.30000001192092896
@@ -136,17 +135,17 @@ Visualization Manager:
       Shaft Length: 0.10000000149011612
       Topic: /WARIO/curr_goal
       Unreliable: false
-      Value: true
+      Value: false
     - Alpha: 0.699999988079071
       Class: rviz/Map
       Color Scheme: map
       Draw Behind: false
-      Enabled: true
+      Enabled: false
       Name: Map
       Topic: world
       Unreliable: false
       Use Timestamp: false
-      Value: true
+      Value: false
     - Class: rviz/TF
       Enabled: false
       Frame Timeout: 15
@@ -223,7 +222,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 20.54021453857422
+      Distance: 5.937559127807617
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -231,17 +230,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 1.6094677448272705
-        Y: 2.2338171005249023
-        Z: -2.9536595344543457
+        X: -0.7070102095603943
+        Y: 0.4680577218532562
+        Z: -0.5134899020195007
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.9553985595703125
+      Pitch: 0.8382741212844849
       Target Frame: <Fixed Frame>
-      Yaw: 1.5853976011276245
+      Yaw: 1.590402364730835
     Saved: ~
 Window Geometry:
   Displays:
